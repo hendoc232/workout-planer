@@ -59,8 +59,8 @@ button:active{opacity:.7}
 .chip2.lift{opacity:.25}
 .chip2.ghost{position:fixed;z-index:50;pointer-events:none;opacity:.95;box-shadow:0 10px 28px rgba(0,0,0,.55);transform:scale(1.04);margin:0}
 .add{width:32px;align-self:center;height:32px;padding:0;border-radius:50%;font-size:20px;line-height:1;flex:none}
-.bar{display:grid;grid-template-columns:auto auto auto auto 1fr;gap:6px;flex:none}
-.bar button{background:rgba(21,11,60,.6);padding:12px 9px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+.bar{display:grid;grid-template-columns:auto auto auto auto auto 1fr;gap:5px;flex:none}
+.bar button{background:rgba(21,11,60,.6);padding:12px 8px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .primary{background:var(--uv)!important;border-color:var(--uv)!important;color:#fff!important;font-weight:800}
 #sheetBg{position:fixed;inset:0;background:rgba(10,5,35,.65);display:flex;align-items:flex-end;justify-content:center;z-index:10;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 #sheetBg.hidden{display:none}
@@ -89,9 +89,49 @@ td:first-child,th:first-child{text-align:left}td.z{color:#bdb4a6}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:-1px}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 84px);transform:translateX(-50%);background:var(--chalk);color:var(--ink);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:60;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:1}
+
+#splash{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .6s ease;
+  background:radial-gradient(120% 55% at 15% -8%,#4b2cb8 0%,rgba(75,44,184,0) 62%),linear-gradient(180deg,#1b0f4a 0%,#150b3c 55%,#0d0726 100%) #150b3c}
+#splash.out{opacity:0;pointer-events:none}
+#splash::before{content:"";position:absolute;left:-15%;right:-15%;bottom:-24vh;height:54vh;border-radius:50%;opacity:.85;filter:blur(55px);
+  background:linear-gradient(95deg,#ff7a45 0%,#ffc53d 22%,#4be3a3 42%,#3da5ff 62%,#8b5cff 82%,#ff6ad5 100%)}
+.sp{position:relative;text-align:center;animation:spin 1s cubic-bezier(.2,.8,.2,1) both}
+.sp span{display:block;font:italic 900 min(15vw,64px)/1.02 var(--disp);letter-spacing:-1px}
+.sp .w1{background:linear-gradient(180deg,#fff 20%,#b7b1da 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp .w2{background:linear-gradient(95deg,#ff9a5a,#ffd35a,#6ff0b5,#59b7ff,#a98aff,#ff8ae0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp i{position:absolute;right:-6px;top:-22px;font-style:normal;font-size:34px;color:#fff;animation:tw 1.6s ease-in-out infinite}
+.sp small{display:block;margin-top:18px;color:var(--mut);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+@keyframes spin{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes tw{0%,100%{transform:scale(.8) rotate(0);opacity:.7}50%{transform:scale(1.15) rotate(20deg);opacity:1}}
+.home{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.next{flex:1.2;min-height:0;max-height:270px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:14px 16px;border-radius:24px;cursor:pointer;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 60%,#1a0f4f) 0%,color-mix(in srgb,var(--c) 22%,#150b3c) 100%);
+  border:1px solid color-mix(in srgb,var(--c) 75%,transparent);box-shadow:0 0 28px color-mix(in srgb,var(--c) 35%,transparent)}
+.next .lbl{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.next .nm{font:italic 900 clamp(28px,9vw,40px)/1.05 var(--disp);letter-spacing:-.5px}
+.next .meta{display:flex;align-items:center;gap:8px;min-width:0}
+.next .meta .t{flex:none;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.32);border-radius:999px;padding:4px 12px;font-weight:800;letter-spacing:.06em}
+.next .when{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:700;color:rgba(255,255,255,.9)}
+.next .when em{font-style:normal;background:var(--coral);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.next.none{--c:#6c63b5;cursor:default}
+.tiles{display:grid;grid-template-columns:1.1fr 1fr 1.3fr;gap:8px;flex:none}
+.tile{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:18px;padding:10px 12px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);min-width:0}
+.tile small{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.tile b{display:block;font:italic 900 26px/1.15 var(--disp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile b.sm{font-size:16px;line-height:1.7}
+.prog{height:6px;border-radius:99px;background:rgba(255,255,255,.14);margin-top:4px;overflow:hidden}.prog i{display:block;height:100%;background:var(--coral);border-radius:99px}
+.panel{flex:1;min-height:0;max-height:260px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:20px;padding:10px 14px 8px;display:flex;flex-direction:column;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.panel small{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.bars{flex:1;min-height:0;display:flex;align-items:flex-end;gap:10px;padding-top:6px}
+.bc{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;min-width:0}
+.bc .v{font-size:12px;font-weight:800}.bc .b{width:100%;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#8b6cff,#4a2fe0);min-height:4px}
+.bc.cur .b{background:linear-gradient(180deg,#ff8a7a,#ff5a4a)}.bc .k{font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.06em}
+.big-btn{padding:16px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;flex:none}
+.bar .ic{padding:12px 11px;font-size:15px}
 </style>
 </head>
 <body>
+<div id="splash"><div class="sp"><i>✦</i><span class="w1">WELCOME</span><span class="w2">ATHLET</span><small>Let’s train</small></div></div>
 <div class="glow"></div>
 <div id="app"></div>
 <div id="sheetBg" class="hidden"><div class="sheet" id="sheet"></div></div>
@@ -177,7 +217,9 @@ function closeSheet(){ $('#sheetBg').classList.add('hidden'); }
 const sheetOpen = () => !$('#sheetBg').classList.contains('hidden');
 
 /* ---------- Rendering ---------- */
-function render(){
+let screen = 'home';
+function render(){ if (screen === 'home') renderHome(); else renderWeek(); }
+function renderWeek(){
   const mon = view.mon, sun = addDays(mon,6), wk = isoWeek(mon), t = todayStr();
   const nPend = S.entries.filter(e => e.date < t && e.done === null && blockOf(e)).length;
   let h = `<div class="top"><button data-act="prev">‹</button><div class="ttl"><b>KW ${wk.w}</b><span>${fmtDM(mon)} – ${fmtDM(sun)}.${sun.getFullYear()}</span></div><button data-act="next">›</button></div>`;
@@ -195,8 +237,58 @@ function render(){
     }).join('');
     h += `<section class="day ${ds===t?'today':''}" data-date="${ds}"><div class="dl"><b>${DAYS[i]}</b><small>${fmtDM(d)}</small></div><div class="chips">${chips || '<div class="free">Frei</div>'}</div><button class="add" data-act="add" data-date="${ds}">+</button></section>`;
   }
-  h += `</div><div class="bar"><button data-act="thisweek">Heute</button><button data-act="stats">Stats</button><button data-act="blocks">Bausteine</button><button data-act="settings">⚙︎</button><button class="primary" data-act="sync">Sync</button></div>`;
+  h += `</div><div class="bar"><button class="ic" data-act="home" aria-label="Start">⌂</button><button data-act="thisweek">Heute</button><button data-act="stats">Stats</button><button data-act="blocks">Bausteine</button><button class="ic" data-act="settings">⚙︎</button><button class="primary" data-act="sync">Sync</button></div>`;
   $('#app').innerHTML = h;
+}
+
+const DAYFULL = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+function nextEntry(){
+  const now = Date.now(); let best = null, bt = Infinity;
+  for (const e of S.entries){
+    const b = blockOf(e); if (!b || !b.sync || e.done === false) continue;
+    const [s,en] = span(e); if (en.getTime() <= now) continue;
+    if (s.getTime() < bt){ bt = s.getTime(); best = e; }
+  }
+  return best;
+}
+function untilText(e){
+  const [s,en] = span(e), now = new Date();
+  if (s <= now && now < en) return 'Läuft gerade';
+  const mins = Math.round((s - now)/60000);
+  if (mins < 60) return `in ${mins} Min`;
+  if (mins < 24*60) return `in ${Math.floor(mins/60)} Std ${mins%60} Min`;
+  const dd = Math.round((parse(e.date) - parse(todayStr()))/864e5);
+  return `in ${dd} Tagen`;
+}
+const doneIn = (from,to) => S.entries.filter(e => e.date >= from && e.date <= to && e.done === true && blockOf(e) && blockOf(e).sync).length;
+function renderHome(){
+  const now = new Date(), t = todayStr(), mon = mondayOf(now), from = ymd(mon), to = ymd(addDays(mon,6));
+  const wkEntries = S.entries.filter(e => e.date >= from && e.date <= to && blockOf(e) && blockOf(e).sync);
+  const plan = wkEntries.length, done = wkEntries.filter(e => e.done === true).length;
+  const all = S.entries.filter(e => e.done === true && blockOf(e) && blockOf(e).sync);
+  const cnt = {}; all.forEach(e => cnt[e.blockId] = (cnt[e.blockId]||0) + 1);
+  const topId = Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a])[0], top = topId && S.blocks.find(b => b.id === topId);
+  const weeks = [5,4,3,2,1,0].map(i => { const m = addDays(mon,-7*i); return {w:isoWeek(m).w, n:doneIn(ymd(m), ymd(addDays(m,6))), cur:i===0}; });
+  const mx = Math.max(1, ...weeks.map(x => x.n));
+  const ne = nextEntry();
+  let card;
+  if (ne){
+    const L = look(ne), dd = Math.round((parse(ne.date) - parse(t))/864e5);
+    const day = dd === 0 ? 'Heute' : dd === 1 ? 'Morgen' : `${DAYS[wdOf(ne.date)]} ${fmtDM(parse(ne.date))}`;
+    card = `<div class="next" style="--c:${esc(L.color)}" data-act="gonext" data-id="${ne.id}"><span class="lbl">Nächstes Workout</span><span class="nm">${esc(L.name)}</span><div class="meta"><span class="t">${esc(ne.start)}</span>${L.loc?`<span class="lc">${esc(L.loc)}</span>`:''}</div><div class="when"><span>${day}</span><em>${untilText(ne)}</em></div></div>`;
+  } else {
+    card = `<div class="next none" data-act="week"><span class="lbl">Nächstes Workout</span><span class="nm">Noch nichts geplant</span><div class="when"><span>Plane deine Woche im Wochenplan</span></div></div>`;
+  }
+  $('#app').innerHTML = `<div class="top"><div style="width:42px"></div><div class="ttl"><b>ATHLET</b><span>${DAYFULL[(now.getDay()+6)%7]} · ${fmtDM(now)}.${now.getFullYear()}</span></div><div style="width:42px"></div></div>
+    <div class="home">${card}
+      <div class="tiles">
+        <div class="tile"><small>Diese Woche</small><b>${done}/${plan}</b><div class="prog"><i style="width:${plan?Math.round(done/plan*100):0}%"></i></div></div>
+        <div class="tile"><small>Gesamt</small><b>${all.length}</b></div>
+        <div class="tile"><small>Meistgemacht</small><b class="sm">${top?esc(top.name):'–'}</b></div>
+      </div>
+      <div class="panel"><small>Erledigt pro Woche</small><div class="bars">${weeks.map(x => `<div class="bc ${x.cur?'cur':''}"><span class="v">${x.n}</span><div class="b" style="height:${Math.round(x.n/mx*100)}%"></div><span class="k">KW ${x.w}</span></div>`).join('')}</div></div>
+    </div>
+    <button class="primary big-btn" data-act="week">Wochenplan öffnen</button>`;
 }
 
 /* ---------- Sheets ---------- */
@@ -301,6 +393,9 @@ document.addEventListener('click', ev => {
     case 'prev': view.mon = addDays(view.mon,-7); render(); break;
     case 'next': view.mon = addDays(view.mon,7); render(); break;
     case 'thisweek': view.mon = mondayOf(new Date()); render(); break;
+    case 'home': screen = 'home'; render(); break;
+    case 'week': screen = 'week'; view.mon = mondayOf(new Date()); render(); break;
+    case 'gonext': if (e){ screen = 'week'; view.mon = mondayOf(parse(e.date)); render(); } break;
     case 'close': closeSheet(); break;
     case 'add': openAdd(el.dataset.date); break;
     case 'addblock': {
@@ -467,6 +562,13 @@ async function syncWeek(){
 })();
 
 /* ---------- Start ---------- */
+(function(){
+  const sp = $('#splash'); if (!sp) return;
+  let gone = false;
+  const hide = () => { if (gone) return; gone = true; sp.classList.add('out'); setTimeout(() => sp.remove(), 700); };
+  setTimeout(hide, 2600); sp.addEventListener('click', hide);
+})();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'home') render(); });
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
