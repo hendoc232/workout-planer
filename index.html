@@ -46,9 +46,14 @@ button:active{opacity:.7}
 .chip2{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;
   background:linear-gradient(135deg,color-mix(in srgb,var(--c) 55%,#1a0f4f) 0%,color-mix(in srgb,var(--c) 22%,#150b3c) 100%);
   border:1px solid color-mix(in srgb,var(--c) 75%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--c) 30%,transparent);
-  border-radius:14px;padding:3px 9px;touch-action:none;cursor:grab}
+  border-radius:14px;padding:3px 9px;touch-action:none;cursor:grab;overflow:hidden}
 .chip2 b{font:italic 800 14.5px/1.12 var(--disp);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.chip2 small{color:rgba(255,255,255,.82);font-size:10.5px;font-weight:700;letter-spacing:.1em}
+.chip2 .meta{display:flex;align-items:center;gap:6px;min-width:0}
+.tm{flex:none;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800;letter-spacing:.06em}
+.tm:active{background:rgba(255,255,255,.4)}
+.lc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:700;color:rgba(255,255,255,.82);letter-spacing:.03em}
+.big{font:italic 900 52px/1 var(--disp);text-align:center;margin:6px 0 10px;letter-spacing:-1px}
+.step{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.step button{padding:11px 0;font-size:14px;font-weight:700}
 .chip2 i{position:absolute;top:3px;right:8px;font-style:normal;font-size:11px;font-weight:800}
 .chip2 i.ok{color:var(--ok)}.chip2 i.no{color:rgba(255,255,255,.5)}.chip2 i.open{color:#ffd0c9}
 .chip2.lift{opacity:.25}
@@ -165,7 +170,7 @@ function suggestions(wd){
 /* ---------- UI-Helfer ---------- */
 let toastT;
 function toast(msg, ms=3200){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
-function openSheet(html){ $('#sheet').innerHTML = html; $('#sheetBg').classList.remove('hidden'); }
+function openSheet(html){ quickId = null; $('#sheet').innerHTML = html; $('#sheetBg').classList.remove('hidden'); }
 function closeSheet(){ $('#sheetBg').classList.add('hidden'); }
 const sheetOpen = () => !$('#sheetBg').classList.contains('hidden');
 
@@ -182,7 +187,9 @@ function render(){
     const chips = ents.map(e => {
       const b = blockOf(e);
       const st = e.done === true ? '<i class="ok">✓</i>' : e.done === false ? '<i class="no">✗</i>' : (ds < t ? '<i class="open">●</i>' : '');
-      return `<div class="chip2" style="--c:${esc(b.color)}" data-id="${e.id}"><b>${esc(b.name)}</b>${b.sync?`<small>${esc(e.start)}</small>`:''}${st}</div>`;
+      const tm = b.sync ? `<span class="tm" data-act="time" data-id="${e.id}">${esc(e.start)}</span>` : '';
+      const lc = b.loc ? `<span class="lc">${esc(b.loc)}</span>` : '';
+      return `<div class="chip2" style="--c:${esc(b.color)}" data-id="${e.id}"><b>${esc(b.name)}</b><div class="meta">${tm}${lc}</div>${st}</div>`;
     }).join('');
     h += `<section class="day ${ds===t?'today':''}" data-date="${ds}"><div class="dl"><b>${DAYS[i]}</b><small>${fmtDM(d)}</small></div><div class="chips">${chips || '<div class="free">Frei</div>'}</div><button class="add" data-act="add" data-date="${ds}">+</button></section>`;
   }
@@ -223,6 +230,21 @@ function openPending(){
   const list = S.entries.filter(e => e.date < t && e.done === null && blockOf(e)).sort((a,b) => a.date.localeCompare(b.date));
   if (!list.length) return closeSheet();
   openSheet(`<h3>Gemacht?</h3><p class="hint">Bestätigte Einheiten fließen ins Lernen ein.</p>` + list.map(e => { const b = blockOf(e); return `<div class="pend"><div class="n"><b>${esc(b.name)}</b><small>${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${b.loc?' · '+esc(b.loc):''}</small></div><button data-act="status" data-from="pend" data-id="${e.id}" data-v="true">✓</button><button data-act="status" data-from="pend" data-id="${e.id}" data-v="false">✗</button></div>`; }).join('') + `<div class="btnrow"><button data-act="close">Schließen</button></div>`);
+}
+let quickId = null;
+const fmtMin = m => `${pad(Math.floor(m/60))}:${pad(m%60)}`;
+const toMin = s => { const [h,m] = s.split(':').map(Number); return h*60 + m; };
+function openTime(id){
+  const e = entryById(id); if (!e) return;
+  const b = blockOf(e);
+  openSheet(`<h3>${esc(b.name)}</h3><p class="hint">${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${b.loc?' · '+esc(b.loc):''}</p>
+    <h4>Start</h4><div class="big">${esc(e.start)}</div>
+    <div class="step"><button data-act="tadj" data-id="${id}" data-f="start" data-d="-60">−1 Std</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="-15">−15</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="15">+15</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="60">+1 Std</button></div>
+    <label>Genaue Uhrzeit</label><input type="time" data-f="start" data-id="${id}" value="${esc(e.start)}">
+    <h4>Dauer · ${e.dur} min</h4>
+    <div class="step"><button data-act="tadj" data-id="${id}" data-f="dur" data-d="-30">−30</button><button data-act="tadj" data-id="${id}" data-f="dur" data-d="-15">−15</button><button data-act="tadj" data-id="${id}" data-f="dur" data-d="15">+15</button><button data-act="tadj" data-id="${id}" data-f="dur" data-d="30">+30</button></div>
+    <div class="btnrow"><button class="primary" data-act="close">Fertig</button></div>`);
+  quickId = id;
 }
 function openStats(){
   const c = counted();
@@ -279,6 +301,11 @@ document.addEventListener('click', ev => {
       S.entries.push({id:uid(), blockId:id, date:ds, start:learnedTime(id, wdOf(ds)), dur:b.dur, done:null});
       save(); closeSheet(); render(); break; }
     case 'edit': openEdit(id); break;
+    case 'time': openTime(id); break;
+    case 'tadj': if (e){
+      if (el.dataset.f === 'start') e.start = fmtMin(Math.min(1425, Math.max(0, toMin(e.start) + (+el.dataset.d))));
+      else e.dur = Math.min(600, Math.max(15, (e.dur || 0) + (+el.dataset.d)));
+      save(); render(); openTime(id); } break;
     case 'moveto': if (e){ e.date = el.dataset.date; save(); render(); openEdit(id); } break;
     case 'status': if (e){ e.done = el.dataset.v === 'null' ? null : el.dataset.v === 'true'; save(); render(); if (el.dataset.from === 'pend') openPending(); else if (sheetOpen()) openEdit(id); } break;
     case 'pending': openPending(); break;
@@ -299,8 +326,8 @@ document.addEventListener('click', ev => {
 document.addEventListener('change', ev => {
   const f = ev.target.dataset && ev.target.dataset.f; if (!f) return;
   const e = ev.target.dataset.id ? entryById(ev.target.dataset.id) : null;
-  if (f === 'start' && e){ e.start = ev.target.value || e.start; save(); render(); }
-  else if (f === 'dur' && e){ e.dur = Math.max(0, parseInt(ev.target.value,10) || 0); save(); render(); }
+  if (f === 'start' && e){ e.start = ev.target.value || e.start; save(); render(); if (quickId === e.id) openTime(e.id); }
+  else if (f === 'dur' && e){ e.dur = Math.max(0, parseInt(ev.target.value,10) || 0); save(); render(); if (quickId === e.id) openTime(e.id); }
   else if (f === 'block' && e){ const b = S.blocks.find(x => x.id === ev.target.value); e.blockId = b.id; e.start = learnedTime(b.id, wdOf(e.date)); e.dur = b.dur; save(); render(); openEdit(e.id); }
   else if (f === 'clientId'){ S.settings.clientId = ev.target.value.trim(); save(); toast('Gespeichert'); }
   else if (f === 'calendarId'){ S.settings.calendarId = ev.target.value.trim() || 'primary'; save(); toast('Gespeichert'); }
@@ -388,7 +415,7 @@ async function syncWeek(){
   let d = null;
   const app = $('#app');
   app.addEventListener('pointerdown', ev => {
-    const c = ev.target.closest('.chip2'); if (!c || ev.button > 0) return;
+    const c = ev.target.closest('.chip2'); if (!c || ev.button > 0 || ev.target.closest('.tm')) return;
     d = {id:c.dataset.id, el:c, x:ev.clientX, y:ev.clientY, moving:false, ghost:null, over:null, pid:ev.pointerId};
     try { c.setPointerCapture(ev.pointerId); } catch(e){}
   });
