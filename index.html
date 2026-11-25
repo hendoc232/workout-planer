@@ -147,6 +147,8 @@ S.settings = Object.assign({clientId:'', calendarId:'primary'}, S.settings);
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Speichern fehlgeschlagen'); } };
 const blockOf = e => S.blocks.find(b => b.id === e.blockId);
 const entryById = id => S.entries.find(e => e.id === id);
+// Anzeige-Werte eines Termins: eigene Anpassung hat Vorrang vor dem Baustein
+const look = e => { const b = blockOf(e); return {name: e.name || b.name, loc: e.loc !== undefined ? e.loc : b.loc, color: e.color || b.color}; };
 let view = {mon: mondayOf(new Date())};
 
 /* ---------- Lernen: zählt nur bestätigte Einheiten vergangener Tage ---------- */
@@ -185,11 +187,11 @@ function render(){
     const d = addDays(mon,i), ds = ymd(d);
     const ents = S.entries.filter(e => e.date === ds && blockOf(e)).sort((a,b) => (a.start||'').localeCompare(b.start||''));
     const chips = ents.map(e => {
-      const b = blockOf(e);
+      const b = blockOf(e), L = look(e);
       const st = e.done === true ? '<i class="ok">✓</i>' : e.done === false ? '<i class="no">✗</i>' : (ds < t ? '<i class="open">●</i>' : '');
       const tm = b.sync ? `<span class="tm" data-act="time" data-id="${e.id}">${esc(e.start)}</span>` : '';
-      const lc = b.loc ? `<span class="lc">${esc(b.loc)}</span>` : '';
-      return `<div class="chip2" style="--c:${esc(b.color)}" data-id="${e.id}"><b>${esc(b.name)}</b><div class="meta">${tm}${lc}</div>${st}</div>`;
+      const lc = L.loc ? `<span class="lc">${esc(L.loc)}</span>` : '';
+      return `<div class="chip2" style="--c:${esc(L.color)}" data-id="${e.id}"><b>${esc(L.name)}</b><div class="meta">${tm}${lc}</div>${st}</div>`;
     }).join('');
     h += `<section class="day ${ds===t?'today':''}" data-date="${ds}"><div class="dl"><b>${DAYS[i]}</b><small>${fmtDM(d)}</small></div><div class="chips">${chips || '<div class="free">Frei</div>'}</div><button class="add" data-act="add" data-date="${ds}">+</button></section>`;
   }
@@ -211,33 +213,38 @@ function openAdd(ds){
 }
 function openEdit(id){
   const e = entryById(id); if (!e) return;
-  const b = blockOf(e), mon = view.mon;
+  const b = blockOf(e), L = look(e), mon = view.mon;
   const dayBtns = DAYS.map((n,i) => { const ds = ymd(addDays(mon,i)); return `<button data-act="moveto" data-id="${id}" data-date="${ds}" class="${ds===e.date?'on':''}">${n}</button>`; }).join('');
   const sel = S.blocks.filter(x => !x.archived || x.id === e.blockId).map(x => `<option value="${x.id}" ${x.id===e.blockId?'selected':''}>${esc(x.name)}${x.loc?' · '+esc(x.loc):''}</option>`).join('');
-  openSheet(`<h3>${esc(b.name)}</h3>
-    <label>Baustein</label><select data-f="block" data-id="${id}">${sel}</select>
+  openSheet(`<h3>${esc(L.name)}</h3>
+    <label>Vorlage (Baustein)</label><select data-f="block" data-id="${id}">${sel}</select>
+    <label>Trainingstyp</label><input type="text" data-f="name" data-id="${id}" value="${esc(L.name)}">
+    <label>Ort</label><input type="text" data-f="loc" data-id="${id}" value="${esc(L.loc)}" placeholder="kein Ort">
     <div class="grid"><div><label>Start</label><input type="time" data-f="start" data-id="${id}" value="${esc(e.start)}"></div><div><label>Dauer (min)</label><input type="number" min="0" step="5" data-f="dur" data-id="${id}" value="${e.dur}"></div></div>
+    <label>Farbe</label><input type="color" data-f="color" data-id="${id}" value="${esc(L.color)}">
     <label>Tag</label><div class="days7">${dayBtns}</div>
     <label>Status</label><div class="seg">
       <button data-act="status" data-id="${id}" data-v="null" class="${e.done===null?'on':''}">Offen</button>
       <button data-act="status" data-id="${id}" data-v="true" class="${e.done===true?'on':''}">Gemacht</button>
       <button data-act="status" data-id="${id}" data-v="false" class="${e.done===false?'on':''}">Nicht gemacht</button></div>
     <p class="hint">Fürs Lernen zählt eine Einheit erst, wenn der Tag vorbei ist und sie als „Gemacht“ bestätigt wurde.</p>
-    <div class="btnrow"><button class="danger" data-act="del" data-id="${id}">Löschen</button><button data-act="close">Fertig</button></div>`);
+    <p class="hint">Änderungen an Typ, Ort und Farbe gelten nur für diesen Termin. Den Baustein selbst änderst du unter „Bausteine“.</p>
+    <div class="btnrow"><button data-act="savelook" data-id="${id}">Als neuen Baustein speichern</button><button data-act="resetlook" data-id="${id}">Auf Baustein zurücksetzen</button></div>
+    <div class="btnrow" style="margin-top:8px"><button class="danger" data-act="del" data-id="${id}">Löschen</button><button data-act="close">Fertig</button></div>`);
 }
 function openPending(){
   const t = todayStr();
   const list = S.entries.filter(e => e.date < t && e.done === null && blockOf(e)).sort((a,b) => a.date.localeCompare(b.date));
   if (!list.length) return closeSheet();
-  openSheet(`<h3>Gemacht?</h3><p class="hint">Bestätigte Einheiten fließen ins Lernen ein.</p>` + list.map(e => { const b = blockOf(e); return `<div class="pend"><div class="n"><b>${esc(b.name)}</b><small>${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${b.loc?' · '+esc(b.loc):''}</small></div><button data-act="status" data-from="pend" data-id="${e.id}" data-v="true">✓</button><button data-act="status" data-from="pend" data-id="${e.id}" data-v="false">✗</button></div>`; }).join('') + `<div class="btnrow"><button data-act="close">Schließen</button></div>`);
+  openSheet(`<h3>Gemacht?</h3><p class="hint">Bestätigte Einheiten fließen ins Lernen ein.</p>` + list.map(e => { const L = look(e); return `<div class="pend"><div class="n"><b>${esc(L.name)}</b><small>${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${L.loc?' · '+esc(L.loc):''}</small></div><button data-act="status" data-from="pend" data-id="${e.id}" data-v="true">✓</button><button data-act="status" data-from="pend" data-id="${e.id}" data-v="false">✗</button></div>`; }).join('') + `<div class="btnrow"><button data-act="close">Schließen</button></div>`);
 }
 let quickId = null;
 const fmtMin = m => `${pad(Math.floor(m/60))}:${pad(m%60)}`;
 const toMin = s => { const [h,m] = s.split(':').map(Number); return h*60 + m; };
 function openTime(id){
   const e = entryById(id); if (!e) return;
-  const b = blockOf(e);
-  openSheet(`<h3>${esc(b.name)}</h3><p class="hint">${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${b.loc?' · '+esc(b.loc):''}</p>
+  const L = look(e);
+  openSheet(`<h3>${esc(L.name)}</h3><p class="hint">${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${L.loc?' · '+esc(L.loc):''}</p>
     <h4>Start</h4><div class="big">${esc(e.start)}</div>
     <div class="step"><button data-act="tadj" data-id="${id}" data-f="start" data-d="-60">−1 Std</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="-15">−15</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="15">+15</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="60">+1 Std</button></div>
     <label>Genaue Uhrzeit</label><input type="time" data-f="start" data-id="${id}" value="${esc(e.start)}">
@@ -302,6 +309,9 @@ document.addEventListener('click', ev => {
       save(); closeSheet(); render(); break; }
     case 'edit': openEdit(id); break;
     case 'time': openTime(id); break;
+    case 'resetlook': if (e){ delete e.name; delete e.loc; delete e.color; save(); render(); openEdit(id); } break;
+    case 'savelook': if (e){ const b = blockOf(e), L = look(e), nb = {id:'b_' + uid(), name:L.name, loc:L.loc, color:L.color, start:e.start, dur:e.dur, sync:b.sync};
+      S.blocks.push(nb); e.blockId = nb.id; delete e.name; delete e.loc; delete e.color; save(); render(); openEdit(id); toast('Neuer Baustein gespeichert'); } break;
     case 'tadj': if (e){
       if (el.dataset.f === 'start') e.start = fmtMin(Math.min(1425, Math.max(0, toMin(e.start) + (+el.dataset.d))));
       else e.dur = Math.min(600, Math.max(15, (e.dur || 0) + (+el.dataset.d)));
@@ -328,7 +338,14 @@ document.addEventListener('change', ev => {
   const e = ev.target.dataset.id ? entryById(ev.target.dataset.id) : null;
   if (f === 'start' && e){ e.start = ev.target.value || e.start; save(); render(); if (quickId === e.id) openTime(e.id); }
   else if (f === 'dur' && e){ e.dur = Math.max(0, parseInt(ev.target.value,10) || 0); save(); render(); if (quickId === e.id) openTime(e.id); }
-  else if (f === 'block' && e){ const b = S.blocks.find(x => x.id === ev.target.value); e.blockId = b.id; e.start = learnedTime(b.id, wdOf(e.date)); e.dur = b.dur; save(); render(); openEdit(e.id); }
+  else if (f === 'block' && e){ const b = S.blocks.find(x => x.id === ev.target.value); delete e.name; delete e.loc; delete e.color; e.blockId = b.id; e.start = learnedTime(b.id, wdOf(e.date)); e.dur = b.dur; save(); render(); openEdit(e.id); }
+  else if ((f === 'name' || f === 'loc' || f === 'color') && e){
+    const b = blockOf(e), v = ev.target.value.trim();
+    if (f === 'name'){ if (!v || v === b.name) delete e.name; else e.name = v; }
+    else if (f === 'loc'){ if (v === b.loc) delete e.loc; else e.loc = v; }
+    else { if (v.toLowerCase() === b.color.toLowerCase()) delete e.color; else e.color = v; }
+    save(); render();
+  }
   else if (f === 'clientId'){ S.settings.clientId = ev.target.value.trim(); save(); toast('Gespeichert'); }
   else if (f === 'calendarId'){ S.settings.calendarId = ev.target.value.trim() || 'primary'; save(); toast('Gespeichert'); }
   else if (f === 'import'){
@@ -361,8 +378,8 @@ function exportIcs(){
   const fl = d => localIso(d).replace(/[-:]/g,'');
   const tx = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
   const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Workout Planer//DE','CALSCALE:GREGORIAN'];
-  list.forEach(e => { const b = blockOf(e), [s,en] = span(e);
-    L.push('BEGIN:VEVENT',`UID:${e.id}@workout-planer`,`DTSTAMP:${stamp}`,`DTSTART:${fl(s)}`,`DTEND:${fl(en)}`,`SUMMARY:${tx(b.name)}`,...(b.loc?[`LOCATION:${tx(b.loc)}`]:[]),'END:VEVENT'); });
+  list.forEach(e => { const L = look(e), [s,en] = span(e);
+    L.push('BEGIN:VEVENT',`UID:${e.id}@workout-planer`,`DTSTAMP:${stamp}`,`DTSTART:${fl(s)}`,`DTEND:${fl(en)}`,`SUMMARY:${tx(L.name)}`,...(L.loc?[`LOCATION:${tx(L.loc)}`]:[]),'END:VEVENT'); });
   L.push('END:VCALENDAR');
   download(`workouts-${wk.key}.ics`, L.join('\r\n'), 'text/calendar');
 }
@@ -399,9 +416,9 @@ async function syncWeek(){
   for (const ev of old){ r = await fetch(`${base}/${ev.id}`, {method:'DELETE', headers:H}); await chk(r, 'Löschen'); }
 
   for (const e of list){
-    const b = blockOf(e), [s,en] = span(e);
+    const L = look(e), [s,en] = span(e);
     r = await fetch(base, {method:'POST', headers:H, body:JSON.stringify({
-      summary: b.name, location: b.loc || undefined,
+      summary: L.name, location: L.loc || undefined,
       start:{dateTime:localIso(s), timeZone:tz}, end:{dateTime:localIso(en), timeZone:tz},
       extendedProperties:{private:{wpWeek:wk.key, wpApp:'workout-planer'}}
     })});
