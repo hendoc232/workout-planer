@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workouts">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Workout Planer</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#0a0a0e;--card:#16161d;--line:#26262f;--tx:#f2f2f6;--mut:#9a9aa8;--red:#ff4560;--ok:#46dcbe}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+#app{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 40px)}
+button,input,select{font:inherit;color:inherit}
+button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer}
+button:active{opacity:.7}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.top button{width:46px;height:46px;font-size:26px;padding:0;line-height:1}
+.ttl{text-align:center}.ttl b{display:block;font-size:30px;letter-spacing:.5px}.ttl span{color:var(--mut);font-size:14px}
+.row2{display:flex;gap:8px;margin-bottom:14px}
+.chip{flex:1;padding:8px 6px;font-size:14px;border-radius:999px}
+.banner{background:#2a1118;border:1px solid #5a2030;border-radius:16px;padding:12px;margin-bottom:14px}
+.banner h4{margin:0 0 8px;font-size:14px;color:#ff8aa0}
+.pend{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #4a1b28}
+.pend:first-of-type{border-top:0}
+.pend .n{flex:1;min-width:0}.pend .n small{display:block;color:var(--mut)}
+.pend button{padding:8px 12px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 10px 8px;margin-bottom:10px}
+.day.today{border-color:var(--red);box-shadow:0 0 0 1px var(--red) inset}
+.day header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.day header b{font-size:18px;width:28px}.day header span{color:var(--mut);flex:1}
+.add{width:36px;height:36px;padding:0;border-radius:50%;font-size:22px;line-height:1}
+.empty{color:#5d5d6b;padding:6px 2px 8px;font-size:14px}
+.ent{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--c) 16%,#0f0f14);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);border-left:6px solid var(--c);border-radius:14px;padding:9px 8px 9px 10px;margin-bottom:6px}
+.ent .t{width:46px;font-size:14px;font-weight:600;color:#d6d6de;flex:none}
+.ent .t small{display:block;font-weight:400;color:var(--mut);font-size:11px}
+.ent .nm{flex:1;min-width:0}.ent .nm b{display:block;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ent .nm small{color:var(--c);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.st{font-size:13px;font-weight:700;flex:none}.st.ok{color:var(--ok)}.st.no{color:var(--mut)}.st.open{color:#ff8aa0;font-weight:600}
+.mvb{display:flex;gap:4px;flex:none}.mvb button{width:34px;height:34px;padding:0;border-radius:10px;font-size:18px;line-height:1}
+.mvb button:disabled{opacity:.25}
+.actions{display:grid;gap:8px;margin-top:16px}
+.primary{background:var(--red);border-color:var(--red);font-weight:700;padding:14px}
+.foot{text-align:center;color:#5d5d6b;font-weight:700;letter-spacing:2px;font-size:12px;margin-top:22px}
+#sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+#sheetBg.hidden{display:none}
+.sheet{background:#13131a;width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 20px);border:1px solid var(--line)}
+.sheet h3{margin:0 0 10px;font-size:20px}.sheet h4{margin:14px 0 6px;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.bb{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin-bottom:6px;border-left:6px solid var(--c)}
+.bb small{color:var(--mut);margin-left:auto;font-size:12px}
+label{display:block;margin:10px 0 4px;color:var(--mut);font-size:13px}
+input[type=text],input[type=time],input[type=number],select{width:100%;background:#0d0d12;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px}
+input[type=color]{width:100%;height:42px;background:#0d0d12;border:1px solid var(--line);border-radius:10px;padding:3px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 4px;font-size:14px}.seg .on{background:var(--red);border-color:var(--red)}
+.days7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.days7 button{padding:9px 0;font-size:13px}.days7 .on{background:var(--red);border-color:var(--red)}
+.btnrow{display:flex;gap:8px;margin-top:16px}.btnrow button{flex:1}
+.danger{color:#ff8aa0}
+.hint{color:var(--mut);font-size:13px;margin:6px 0 0}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:6px 3px;text-align:center;border-bottom:1px solid var(--line)}
+td:first-child,th:first-child{text-align:left}td.z{color:#4a4a58}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:20;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheetBg" class="hidden"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* ---------- Helfer ---------- */
+const $ = s => document.querySelector(s);
+const DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const mondayOf = d => { const x = new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate() - (x.getDay()+6)%7); return x; };
+const fmtDM = d => `${pad(d.getDate())}.${pad(d.getMonth()+1)}`;
+const wdOf = s => (parse(s).getDay()+6)%7;
+const todayStr = () => ymd(new Date());
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function isoWeek(d){
+  const t = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay()||7));
+  const y = t.getUTCFullYear();
+  const w = Math.ceil(((t - Date.UTC(y,0,1))/864e5 + 1)/7);
+  return {y, w, key:`${y}-W${pad(w)}`};
+}
+
+/* ---------- Daten ---------- */
+const KEY = 'workout_planer_v1';
+function seed(){
+  const blocks = [
+    {id:'squat', name:'Backsquat', loc:'Gym Evo Rosa', color:'#ff4560', start:'18:00', dur:90, sync:true},
+    {id:'dead',  name:'Deadlift',  loc:'Gym Evo Rosa', color:'#ff4560', start:'18:00', dur:90, sync:true},
+    {id:'jerk',  name:'Split Jerk',loc:'Gym Evo Rosa', color:'#ff4560', start:'18:00', dur:90, sync:true},
+    {id:'gren',  name:'CrossFit',  loc:'CrossFit Grenzgänger', color:'#4096ff', start:'08:00', dur:60, sync:true},
+    {id:'cfm',   name:'Strength',  loc:'CrossFit CFM', color:'#46dcbe', start:'17:00', dur:60, sync:true},
+    {id:'oly',   name:'Olympic Weightlifting', loc:'CrossFit Grenzgänger', color:'#4096ff', start:'11:00', dur:90, sync:true},
+    {id:'pil',   name:'Hot Pilates', loc:'Sunyoga', color:'#ff9632', start:'12:15', dur:60, sync:true},
+    {id:'run',   name:'Laufen', loc:'', color:'#a3e635', start:'07:00', dur:45, sync:true},
+    {id:'yoga',  name:'Yoga', loc:'', color:'#c084fc', start:'19:00', dur:60, sync:true},
+    {id:'rest',  name:'Restday', loc:'', color:'#8b8b99', start:'00:00', dur:0, sync:false}
+  ];
+  const plan = [['2026-11-30','squat','18:00'],['2026-12-01','jerk','18:00'],['2026-12-02','gren','08:00'],
+                ['2026-12-03','dead','18:00'],['2026-12-04','cfm','17:00'],['2026-12-05','pil','12:15'],['2026-12-06','oly','11:00']];
+  const entries = plan.map(([date,blockId,start]) => {
+    const b = blocks.find(x => x.id === blockId);
+    return {id:uid(), blockId, date, start, dur:b.dur, done:null};
+  });
+  return {blocks, entries, settings:{clientId:'', calendarId:'primary'}};
+}
+let S = (() => { try { const j = JSON.parse(localStorage.getItem(KEY)); if (j && j.blocks && j.entries) return j; } catch(e){} return seed(); })();
+S.settings = Object.assign({clientId:'', calendarId:'primary'}, S.settings);
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Speichern fehlgeschlagen'); } };
+const blockOf = e => S.blocks.find(b => b.id === e.blockId);
+const entryById = id => S.entries.find(e => e.id === id);
+let view = {mon: mondayOf(new Date())};
+
+/* ---------- Lernen: zählt nur bestätigte Einheiten vergangener Tage ---------- */
+const counted = () => { const t = todayStr(); return S.entries.filter(e => e.done === true && e.date < t && blockOf(e)); };
+function learnedTime(blockId, wd){
+  const b = S.blocks.find(x => x.id === blockId);
+  const c = counted().filter(e => e.blockId === blockId);
+  const pool = c.filter(e => wdOf(e.date) === wd);
+  const use = pool.length ? pool : c;
+  if (!use.length) return b.start;
+  const m = {}; use.forEach(e => m[e.start] = (m[e.start]||0) + 1);
+  return Object.entries(m).sort((a,b2) => b2[1]-a[1] || a[0].localeCompare(b2[0]))[0][0];
+}
+function suggestions(wd){
+  const m = {};
+  counted().filter(e => wdOf(e.date) === wd).forEach(e => m[e.blockId] = (m[e.blockId]||0) + 1);
+  return Object.entries(m).map(([id,n]) => ({block:S.blocks.find(b => b.id === id), n, time:learnedTime(id,wd)}))
+    .filter(s => s.block && !s.block.archived).sort((a,b) => b.n - a.n);
+}
+
+/* ---------- UI-Helfer ---------- */
+let toastT;
+function toast(msg, ms=3200){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+function openSheet(html){ $('#sheet').innerHTML = html; $('#sheetBg').classList.remove('hidden'); }
+function closeSheet(){ $('#sheetBg').classList.add('hidden'); }
+const sheetOpen = () => !$('#sheetBg').classList.contains('hidden');
+
+/* ---------- Rendering ---------- */
+function render(){
+  const mon = view.mon, sun = addDays(mon,6), wk = isoWeek(mon), t = todayStr();
+  let h = `<div class="top"><button data-act="prev">‹</button><div class="ttl"><b>KW ${wk.w}</b><span>${fmtDM(mon)} – ${fmtDM(sun)}.${sun.getFullYear()}</span></div><button data-act="next">›</button></div>`;
+  h += `<div class="row2"><button class="chip" data-act="thisweek">Heute</button><button class="chip" data-act="stats">Statistik</button><button class="chip" data-act="blocks">Bausteine</button><button class="chip" data-act="settings">⚙︎</button></div>`;
+
+  const pend = S.entries.filter(e => e.date < t && e.done === null && blockOf(e)).sort((a,b) => a.date.localeCompare(b.date));
+  if (pend.length){
+    h += `<div class="banner"><h4>Gemacht? ${pend.length} Einheit${pend.length>1?'en':''} warten auf Bestätigung</h4>` +
+      pend.slice(0,5).map(e => { const b = blockOf(e); return `<div class="pend"><div class="n"><b>${esc(b.name)}</b><small>${DAYS[wdOf(e.date)]} ${fmtDM(parse(e.date))}${b.loc?' · '+esc(b.loc):''}</small></div><button data-act="status" data-id="${e.id}" data-v="true">✓</button><button data-act="status" data-id="${e.id}" data-v="false">✗</button></div>`; }).join('') +
+      (pend.length>5?`<div class="hint">… und ${pend.length-5} weitere</div>`:'') + `</div>`;
+  }
+
+  for (let i=0;i<7;i++){
+    const d = addDays(mon,i), ds = ymd(d);
+    const ents = S.entries.filter(e => e.date === ds && blockOf(e)).sort((a,b) => (a.start||'').localeCompare(b.start||''));
+    const rows = ents.map(e => {
+      const b = blockOf(e);
+      const st = e.done === true ? '<span class="st ok">✓</span>' : e.done === false ? '<span class="st no">✗</span>' : (ds < t ? '<span class="st open">offen</span>' : '');
+      const time = b.sync ? `${esc(e.start)}<small>${e.dur} min</small>` : '–';
+      return `<div class="ent" style="--c:${esc(b.color)}" data-act="edit" data-id="${e.id}"><div class="t">${time}</div><div class="nm"><b>${esc(b.name)}</b>${b.loc?`<small>${esc(b.loc)}</small>`:''}</div>${st}<div class="mvb"><button data-act="mv" data-id="${e.id}" data-dir="-1" ${i===0?'disabled':''}>‹</button><button data-act="mv" data-id="${e.id}" data-dir="1" ${i===6?'disabled':''}>›</button></div></div>`;
+    }).join('');
+    h += `<section class="day ${ds===t?'today':''}"><header><b>${DAYS[i]}</b><span>${fmtDM(d)}</span><button class="add" data-act="add" data-date="${ds}">+</button></header>${rows || '<div class="empty">Frei</div>'}</section>`;
+  }
+  h += `<div class="actions"><button class="primary" data-act="sync">KW ${wk.w} in Google Kalender ersetzen</button><button data-act="ics">Als .ics exportieren</button></div><p class="foot">SWEAT AND SPARKLE</p>`;
+  $('#app').innerHTML = h;
+}
+
+/* ---------- Sheets ---------- */
+function blockBtn(b, ds, info){
+  return `<button class="bb" style="--c:${esc(b.color)}" data-act="addblock" data-id="${b.id}" data-date="${ds}"><b>${esc(b.name)}</b>${b.loc?`<small style="margin-left:6px">${esc(b.loc)}</small>`:''}<small>${esc(info||'')}</small></button>`;
+}
+function openAdd(ds){
+  const wd = wdOf(ds), sug = suggestions(wd).slice(0,3);
+  let h = `<h3>Hinzufügen · ${DAYS[wd]} ${fmtDM(parse(ds))}</h3>`;
+  if (sug.length) h += `<h4>Vorschläge (gelernt)</h4>` + sug.map(s => blockBtn(s.block, ds, `${s.n}× ${DAYS[wd]} · meist ${s.time}`)).join('');
+  h += `<h4>Alle Bausteine</h4>` + S.blocks.filter(b => !b.archived).map(b => blockBtn(b, ds, b.sync ? `${b.start} · ${b.dur} min` : '')).join('');
+  h += `<div class="btnrow"><button data-act="close">Abbrechen</button></div>`;
+  openSheet(h);
+}
+function openEdit(id){
+  const e = entryById(id); if (!e) return;
+  const b = blockOf(e), mon = view.mon;
+  const dayBtns = DAYS.map((n,i) => { const ds = ymd(addDays(mon,i)); return `<button data-act="moveto" data-id="${id}" data-date="${ds}" class="${ds===e.date?'on':''}">${n}</button>`; }).join('');
+  const sel = S.blocks.filter(x => !x.archived || x.id === e.blockId).map(x => `<option value="${x.id}" ${x.id===e.blockId?'selected':''}>${esc(x.name)}${x.loc?' · '+esc(x.loc):''}</option>`).join('');
+  openSheet(`<h3>${esc(b.name)}</h3>
+    <label>Baustein</label><select data-f="block" data-id="${id}">${sel}</select>
+    <div class="grid"><div><label>Start</label><input type="time" data-f="start" data-id="${id}" value="${esc(e.start)}"></div><div><label>Dauer (min)</label><input type="number" min="0" step="5" data-f="dur" data-id="${id}" value="${e.dur}"></div></div>
+    <label>Tag</label><div class="days7">${dayBtns}</div>
+    <label>Status</label><div class="seg">
+      <button data-act="status" data-id="${id}" data-v="null" class="${e.done===null?'on':''}">Offen</button>
+      <button data-act="status" data-id="${id}" data-v="true" class="${e.done===true?'on':''}">Gemacht</button>
+      <button data-act="status" data-id="${id}" data-v="false" class="${e.done===false?'on':''}">Nicht gemacht</button></div>
+    <p class="hint">Fürs Lernen zählt eine Einheit erst, wenn der Tag vorbei ist und sie als „Gemacht“ bestätigt wurde.</p>
+    <div class="btnrow"><button class="danger" data-act="del" data-id="${id}">Löschen</button><button data-act="close">Fertig</button></div>`);
+}
+function openStats(){
+  const c = counted();
+  const rows = S.blocks.map(b => {
+    const cnt = Array(7).fill(0); c.filter(e => e.blockId === b.id).forEach(e => cnt[wdOf(e.date)]++);
+    const tot = cnt.reduce((a,x) => a+x, 0); if (!tot) return '';
+    return `<tr><td style="color:${esc(b.color)};font-weight:600">${esc(b.name)}</td>${cnt.map(n => n?`<td>${n}</td>`:'<td class="z">·</td>').join('')}<td><b>${tot}</b></td></tr>`;
+  }).join('');
+  openSheet(`<h3>Statistik</h3><p class="hint">${c.length} bestätigte Einheiten aus vergangenen Tagen. Nur diese fließen in die Vorschläge ein.</p>` +
+    (rows ? `<table><tr><th></th>${DAYS.map(d => `<th>${d}</th>`).join('')}<th>Σ</th></tr>${rows}</table>` : `<p class="hint">Noch nichts gezählt. Bestätige vergangene Einheiten mit ✓, dann beginnt die App zu lernen.</p>`) +
+    `<div class="btnrow"><button data-act="close">Schließen</button></div>`);
+}
+function openBlocks(){
+  openSheet(`<h3>Bausteine</h3>` + S.blocks.map(b => `<button class="bb" style="--c:${esc(b.color)};${b.archived?'opacity:.45':''}" data-act="editblock" data-id="${b.id}"><b>${esc(b.name)}</b>${b.loc?`<small style="margin-left:6px">${esc(b.loc)}</small>`:''}<small>${b.archived?'archiviert':(b.sync?b.start+' · '+b.dur+' min':'kein Termin')}</small></button>`).join('') +
+    `<div class="btnrow"><button data-act="close">Schließen</button><button class="primary" data-act="newblock">+ Neuer Baustein</button></div>`);
+}
+function openBlockEdit(id){
+  const b = id === 'new' ? {id:'new', name:'', loc:'', color:'#ff4560', start:'18:00', dur:60, sync:true} : S.blocks.find(x => x.id === id);
+  openSheet(`<h3>${id==='new'?'Neuer Baustein':'Baustein bearbeiten'}</h3>
+    <label>Name</label><input type="text" id="be-name" value="${esc(b.name)}" placeholder="z. B. Backsquat">
+    <label>Ort</label><input type="text" id="be-loc" value="${esc(b.loc)}" placeholder="z. B. Gym Evo Rosa">
+    <div class="grid"><div><label>Standard-Start</label><input type="time" id="be-start" value="${esc(b.start)}"></div><div><label>Dauer (min)</label><input type="number" id="be-dur" min="0" step="5" value="${b.dur}"></div></div>
+    <label>Farbe</label><input type="color" id="be-color" value="${esc(b.color)}">
+    <label><input type="checkbox" id="be-sync" ${b.sync?'checked':''}> Als Termin in den Kalender (aus = z. B. Restday)</label>
+    <div class="btnrow">${id==='new'?'':`<button class="danger" data-act="archive" data-id="${id}">${b.archived?'Wiederherstellen':'Archivieren'}</button>`}<button class="primary" data-act="saveblock" data-id="${id}">Speichern</button></div>`);
+}
+function openSettings(){
+  openSheet(`<h3>Einstellungen</h3>
+    <label>Google OAuth Client-ID</label><input type="text" data-f="clientId" value="${esc(S.settings.clientId)}" placeholder="123456-abc.apps.googleusercontent.com">
+    <label>Kalender-ID (leer lassen = Hauptkalender)</label><input type="text" data-f="calendarId" value="${esc(S.settings.calendarId==='primary'?'':S.settings.calendarId)}" placeholder="primary">
+    <h4>Backup</h4>
+    <div class="btnrow" style="margin-top:0"><button data-act="export">Daten sichern</button><button data-act="import">Daten laden</button></div>
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none" data-f="import">
+    <p class="hint">Alle Daten liegen nur auf diesem Gerät (in der Homescreen-App). Sichere sie ab und zu.</p>
+    <div class="btnrow"><button data-act="close">Schließen</button></div>`);
+}
+
+/* ---------- Aktionen ---------- */
+document.addEventListener('click', ev => {
+  if (ev.target.id === 'sheetBg') return closeSheet();
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  ev.stopPropagation();
+  const a = el.dataset.act, id = el.dataset.id, e = id ? entryById(id) : null;
+  switch (a){
+    case 'prev': view.mon = addDays(view.mon,-7); render(); break;
+    case 'next': view.mon = addDays(view.mon,7); render(); break;
+    case 'thisweek': view.mon = mondayOf(new Date()); render(); break;
+    case 'close': closeSheet(); break;
+    case 'add': openAdd(el.dataset.date); break;
+    case 'addblock': {
+      const b = S.blocks.find(x => x.id === id), ds = el.dataset.date;
+      S.entries.push({id:uid(), blockId:id, date:ds, start:learnedTime(id, wdOf(ds)), dur:b.dur, done:null});
+      save(); closeSheet(); render(); break; }
+    case 'edit': openEdit(id); break;
+    case 'mv': if (e){ const nd = ymd(addDays(parse(e.date), +el.dataset.dir)); e.date = nd; save(); render(); } break;
+    case 'moveto': if (e){ e.date = el.dataset.date; save(); render(); openEdit(id); } break;
+    case 'status': if (e){ e.done = el.dataset.v === 'null' ? null : el.dataset.v === 'true'; save(); render(); if (sheetOpen()) openEdit(id); } break;
+    case 'del': if (e && confirm('Eintrag löschen?')){ S.entries = S.entries.filter(x => x.id !== id); save(); closeSheet(); render(); } break;
+    case 'stats': openStats(); break;
+    case 'blocks': openBlocks(); break;
+    case 'newblock': openBlockEdit('new'); break;
+    case 'editblock': openBlockEdit(id); break;
+    case 'archive': { const b = S.blocks.find(x => x.id === id); b.archived = !b.archived; save(); openBlocks(); render(); break; }
+    case 'saveblock': saveBlock(id); break;
+    case 'settings': openSettings(); break;
+    case 'export': download(`workout-backup-${todayStr()}.json`, JSON.stringify(S,null,1), 'application/json'); break;
+    case 'import': $('#importFile').click(); break;
+    case 'sync': syncWeek().catch(err => toast('Sync fehlgeschlagen: ' + err.message, 6000)); break;
+    case 'ics': exportIcs(); break;
+  }
+});
+document.addEventListener('change', ev => {
+  const f = ev.target.dataset && ev.target.dataset.f; if (!f) return;
+  const e = ev.target.dataset.id ? entryById(ev.target.dataset.id) : null;
+  if (f === 'start' && e){ e.start = ev.target.value || e.start; save(); render(); }
+  else if (f === 'dur' && e){ e.dur = Math.max(0, parseInt(ev.target.value,10) || 0); save(); render(); }
+  else if (f === 'block' && e){ const b = S.blocks.find(x => x.id === ev.target.value); e.blockId = b.id; e.start = learnedTime(b.id, wdOf(e.date)); e.dur = b.dur; save(); render(); openEdit(e.id); }
+  else if (f === 'clientId'){ S.settings.clientId = ev.target.value.trim(); save(); toast('Gespeichert'); }
+  else if (f === 'calendarId'){ S.settings.calendarId = ev.target.value.trim() || 'primary'; save(); toast('Gespeichert'); }
+  else if (f === 'import'){
+    const file = ev.target.files[0]; if (!file) return;
+    file.text().then(t => { const j = JSON.parse(t); if (!Array.isArray(j.blocks) || !Array.isArray(j.entries)) throw new Error('Ungültige Datei'); S = j; S.settings = Object.assign({clientId:'',calendarId:'primary'}, S.settings); save(); closeSheet(); render(); toast('Daten geladen'); }).catch(err => toast('Import fehlgeschlagen: ' + err.message));
+  }
+});
+function saveBlock(id){
+  const name = $('#be-name').value.trim(); if (!name) return toast('Bitte einen Namen eingeben');
+  const data = {name, loc:$('#be-loc').value.trim(), color:$('#be-color').value, start:$('#be-start').value || '18:00', dur:Math.max(0, parseInt($('#be-dur').value,10) || 0), sync:$('#be-sync').checked};
+  if (id === 'new') S.blocks.push(Object.assign({id:'b_' + uid()}, data));
+  else Object.assign(S.blocks.find(b => b.id === id), data);
+  save(); openBlocks(); render();
+}
+function download(name, text, type){
+  const blob = new Blob([text], {type}), file = new File([blob], name, {type});
+  if (navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(() => {}); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- Kalender ---------- */
+const weekEntries = mon => { const from = ymd(mon), to = ymd(addDays(mon,6)); return S.entries.filter(e => e.date >= from && e.date <= to && blockOf(e) && blockOf(e).sync); };
+function span(e){ const [h,m] = e.start.split(':').map(Number); const s = parse(e.date); s.setHours(h,m,0,0); const en = new Date(s.getTime() + (e.dur||60)*60000); return [s,en]; }
+const localIso = d => `${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+
+function exportIcs(){
+  const wk = isoWeek(view.mon), list = weekEntries(view.mon);
+  if (!list.length) return toast('Keine Termine in dieser Woche');
+  const stamp = new Date().toISOString().replace(/[-:]|\.\d{3}/g,'');
+  const fl = d => localIso(d).replace(/[-:]/g,'');
+  const tx = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
+  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Workout Planer//DE','CALSCALE:GREGORIAN'];
+  list.forEach(e => { const b = blockOf(e), [s,en] = span(e);
+    L.push('BEGIN:VEVENT',`UID:${e.id}@workout-planer`,`DTSTAMP:${stamp}`,`DTSTART:${fl(s)}`,`DTEND:${fl(en)}`,`SUMMARY:${tx(b.name)}`,...(b.loc?[`LOCATION:${tx(b.loc)}`]:[]),'END:VEVENT'); });
+  L.push('END:VCALENDAR');
+  download(`workouts-${wk.key}.ics`, L.join('\r\n'), 'text/calendar');
+}
+
+const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+let tok = {t:null, exp:0};
+function getToken(){
+  return new Promise((resolve, reject) => {
+    if (tok.t && Date.now() < tok.exp) return resolve(tok.t);
+    const g = window.google && google.accounts && google.accounts.oauth2;
+    if (!g) return reject(new Error('Google-Anmeldung nicht geladen (offline?)'));
+    if (!S.settings.clientId) return reject(new Error('Bitte zuerst die Client-ID in den Einstellungen eintragen'));
+    const tc = g.initTokenClient({
+      client_id: S.settings.clientId, scope: SCOPE,
+      callback: r => { if (r.error) return reject(new Error(r.error_description || r.error)); tok = {t:r.access_token, exp:Date.now() + (r.expires_in - 60)*1000}; resolve(tok.t); },
+      error_callback: er => reject(new Error(er.type || 'Anmeldung abgebrochen'))
+    });
+    tc.requestAccessToken({prompt: ''});
+  });
+}
+async function syncWeek(){
+  const wk = isoWeek(view.mon), list = weekEntries(view.mon);
+  const token = await getToken();   // direkt nach dem Tippen, damit das Popup erlaubt bleibt
+  toast('Synchronisiere …', 8000);
+  const cal = encodeURIComponent(S.settings.calendarId || 'primary');
+  const base = `https://www.googleapis.com/calendar/v3/calendars/${cal}/events`;
+  const H = {Authorization:'Bearer ' + token, 'Content-Type':'application/json'};
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const chk = async (r, what) => { if (!r.ok && r.status !== 410 && r.status !== 404){ let m = r.status; try { m = (await r.json()).error.message; } catch(e){} throw new Error(`${what}: ${m}`); } };
+
+  let r = await fetch(`${base}?privateExtendedProperty=${encodeURIComponent('wpWeek=' + wk.key)}&maxResults=250`, {headers:H});
+  await chk(r, 'Lesen');
+  const old = (await r.json()).items || [];
+  for (const ev of old){ r = await fetch(`${base}/${ev.id}`, {method:'DELETE', headers:H}); await chk(r, 'Löschen'); }
+
+  for (const e of list){
+    const b = blockOf(e), [s,en] = span(e);
+    r = await fetch(base, {method:'POST', headers:H, body:JSON.stringify({
+      summary: b.name, location: b.loc || undefined,
+      start:{dateTime:localIso(s), timeZone:tz}, end:{dateTime:localIso(en), timeZone:tz},
+      extendedProperties:{private:{wpWeek:wk.key, wpApp:'workout-planer'}}
+    })});
+    await chk(r, 'Anlegen');
+  }
+  toast(`KW ${wk.w}: ${old.length} alte entfernt, ${list.length} neue angelegt ✓`, 5000);
+}
+
+/* ---------- Start ---------- */
+render();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
