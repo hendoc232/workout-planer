@@ -184,7 +184,7 @@ a{color:var(--uv);font-weight:700}
 <script>
 'use strict';
 /* ---------- App-Infos ---------- */
-const VERSION = '1.4.0', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
+const VERSION = '1.4.1', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
 
 /* ---------- Helfer ---------- */
 const $ = s => document.querySelector(s);
@@ -763,7 +763,7 @@ const TC = {
   c_logout:'Abmelden', c_leave:'Crew verlassen', c_leaveQ:'Crew wirklich verlassen? Dein geteilter Plan wird dort gelöscht.', c_del:'Konto & Daten löschen', c_delQ:'Konto und alle Crew-Daten endgültig löschen? Die Daten auf diesem Gerät bleiben erhalten.',
   c_deleted:'Konto gelöscht', c_left:'Crew verlassen', c_published:'Plan geteilt', c_noPlans:'Noch keine geteilten Pläne in dieser Woche', c_wrongCode:'Code nicht gefunden', c_full:'Die Crew ist voll (max. 20)',
   c_err:'Fehler: ', c_cancel:'Schließen',
-  c_btnChat:'💬 Chat', c_btnWeek:'Crew-Woche', c_btnMenu:'Crew', c_start:'Crew starten oder beitreten', c_startHint:'Teile deinen Plan mit Freunden, sieh ihre Workouts und chatte mit ihnen.', c_loading:'Crew wird geladen …', c_fromCrew:'Aus deiner Crew', c_crewUse:n => `${n}× in der Crew`, c_more:'+ Weitere Crew', c_switch:'Deine Crews', c_chatNone:'Noch keine Chat-Nachrichten',
+  c_retry:'Neu laden', c_btnChat:'💬 Chat', c_btnWeek:'Crew-Woche', c_btnMenu:'Crew', c_start:'Crew starten oder beitreten', c_startHint:'Teile deinen Plan mit Freunden, sieh ihre Workouts und chatte mit ihnen.', c_loading:'Crew wird geladen …', c_fromCrew:'Aus deiner Crew', c_crewUse:n => `${n}× in der Crew`, c_more:'+ Weitere Crew', c_switch:'Deine Crews', c_chatNone:'Noch keine Chat-Nachrichten',
   c_chat:'Crew-Chat', c_msgPh:'Nachricht …', c_send:'Senden', c_noMsg:'Noch keine Nachrichten', c_delMsg:'Nachricht löschen', c_homeNone:'Noch keine anstehenden Crew-Workouts', c_chatRules:'Bitte respektvoll bleiben. Nachrichten sind für alle in der Crew sichtbar.', c_thread:'Chat zum Termin',
   e_invalid_credential:'E-Mail oder Passwort falsch', e_email_already_in_use:'Diese E-Mail ist schon registriert', e_weak_password:'Passwort zu kurz (mind. 6 Zeichen)', e_invalid_email:'E-Mail ungültig',
   e_popup_closed_by_user:'Anmeldung abgebrochen', e_network_request_failed:'Keine Verbindung', e_permission_denied:'Keine Berechtigung', e_requires_recent_login:'Bitte neu anmelden und erneut versuchen',
@@ -785,13 +785,14 @@ const TC = {
   c_logout:'Sign out', c_leave:'Leave crew', c_leaveQ:'Really leave the crew? Your shared plan will be deleted there.', c_del:'Delete account & data', c_delQ:'Permanently delete your account and all crew data? Data on this device is kept.',
   c_deleted:'Account deleted', c_left:'Left the crew', c_published:'Plan shared', c_noPlans:'No shared plans this week yet', c_wrongCode:'Code not found', c_full:'The crew is full (max. 20)',
   c_err:'Error: ', c_cancel:'Close',
-  c_btnChat:'💬 Chat', c_btnWeek:'Crew week', c_btnMenu:'Crew', c_start:'Start or join a crew', c_startHint:'Share your plan with friends, see their workouts and chat with them.', c_loading:'Loading crew …', c_fromCrew:'From your crew', c_crewUse:n => `${n}× in the crew`, c_more:'+ Another crew', c_switch:'Your crews', c_chatNone:'No chat messages yet',
+  c_retry:'Retry', c_btnChat:'💬 Chat', c_btnWeek:'Crew week', c_btnMenu:'Crew', c_start:'Start or join a crew', c_startHint:'Share your plan with friends, see their workouts and chat with them.', c_loading:'Loading crew …', c_fromCrew:'From your crew', c_crewUse:n => `${n}× in the crew`, c_more:'+ Another crew', c_switch:'Your crews', c_chatNone:'No chat messages yet',
   c_chat:'Crew chat', c_msgPh:'Message …', c_send:'Send', c_noMsg:'No messages yet', c_delMsg:'Delete message', c_homeNone:'No upcoming crew workouts yet', c_chatRules:'Please stay respectful. Messages are visible to everyone in the crew.', c_thread:'Session chat',
   e_invalid_credential:'Wrong email or password', e_email_already_in_use:'This email is already registered', e_weak_password:'Password too short (min. 6 characters)', e_invalid_email:'Invalid email',
   e_popup_closed_by_user:'Sign-in cancelled', e_network_request_failed:'No connection', e_permission_denied:'Not allowed', e_requires_recent_login:'Please sign in again and retry',
   e_operation_not_allowed:'This sign-in method is not enabled', e_popup_blocked:'Popup blocked. Use email and password.', e_too_many_requests:'Too many attempts. Try again later.', e_unauthorized_domain:'Domain not authorised'
  }
 };
+let CERR = '';
 let FB = null, ME = null, PROF = null, CREW = null, cmon = null, crewReady = false, pubT = null, CPLANS = null, chatUnsub = null, CREWS = [], CPALL = {}, CLAST = null;
 const MAXMY = 5;
 const sharing = id => !(S.settings.noShare && S.settings.noShare[id]);
@@ -833,6 +834,10 @@ async function loadCrewState(){
     PROF.crewIds = keep; delete PROF.crewId;
   }
   setActive();
+}
+function crewStart(){
+  return crewInit().then(() => { S.settings.crewOn = CREWS.length > 0; save(); return crewRefresh(); })
+    .catch(e => { CERR = String((e && (e.code || e.message)) || 'Fehler').slice(0, 80); if (page === 'home') render(); });
 }
 function cerr(e){
   const raw = String((e && e.code) || '').replace(/^(auth|firestore)\//,'').replace(/-/g,'_');
@@ -1004,7 +1009,7 @@ document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target
 
 /* ---- Startseiten-Panel ---- */
 async function crewRefresh(){
-  if (!(FB && ME && CREWS.length)) return;
+  if (!(FB && ME && CREWS.length)){ if (crewReady){ delete S.settings.cc; CLAST = null; CPLANS = []; if (page === 'home') render(); } return; }
   const {fs, db} = FB;
   await Promise.all(CREWS.map(async cr => {
     try { const q = await fs.getDocs(fs.collection(db, 'crews', cr.id, 'plans')); CPALL[cr.id] = q.docs.map(d => Object.assign({uid: d.id}, d.data())); } catch(e){}
@@ -1018,14 +1023,27 @@ async function crewRefresh(){
       if (m) CLAST = {name: cslim(m.name), text: String(m.text || '').slice(0, 90)};
     } catch(e){}
   }
+  try {
+    const td = todayStr(), plans = [];
+    (CPLANS || []).forEach(p => { if (ME && p.uid === ME.uid) return; plans.push({uid: p.uid, name: p.name, entries: (p.entries || []).filter(x => x && x.date >= td).slice(0, 12)}); });
+    S.settings.cc = {act: CREW ? CREW.id : null, crews: CREWS.map(x => ({id: x.id, name: x.name, n: (x.members || []).length})), plans, last: CLAST};
+    localStorage.setItem(KEY, JSON.stringify(S));
+  } catch(e){}
   if (page === 'home') render();
 }
 function crewPanel(){
   const btn = (a, l, p) => `<button ${p ? 'class="primary" ' : ''}data-act="${a}">${l}</button>`;
-  if (!S.settings.crewOn) return `<div class="panel cp inv"><small>${t('c_title')}</small><p>${t('c_startHint')}</p><div class="cbtns">${btn('crew', t('c_start'), true)}</div></div>`;
-  if (!CREW) return `<div class="panel cp"><small>${t('c_title')}</small><p class="hint" style="color:var(--mut)">${t('c_loading')}</p></div>`;
+  const cc = S.settings.cc || null;
+  const known = CREW ? true : !!(cc && cc.crews && cc.crews.length);
+  if (!S.settings.crewOn && !known) return `<div class="panel cp inv"><small>${t('c_title')}</small><p>${t('c_startHint')}</p><div class="cbtns">${btn('crew', t('c_start'), true)}</div></div>`;
+  const crews = CREW ? CREWS.map(x => ({id: x.id, name: x.name})) : (cc && cc.crews) || [];
+  const actId = CREW ? CREW.id : (cc && cc.act) || (crews[0] && crews[0].id);
+  const cur = crews.find(x => x.id === actId) || crews[0] || {name: ''};
+  const nMem = CREW ? (CREW.members || []).length : ((cc && cc.crews.find(x => x.id === actId)) || {}).n || 0;
+  const plans = CREW ? (CPLANS || []) : (cc && cc.plans) || [];
+  const last = CREW ? CLAST : (cc && cc.last) || null;
   const now = Date.now(), td = todayStr(), items = [];
-  (CPLANS || []).filter(p => p.uid !== (ME && ME.uid)).forEach(p => (p.entries || []).forEach(x => {
+  plans.filter(p => p.uid !== (ME && ME.uid)).forEach(p => (p.entries || []).forEach(x => {
     if (!x || !x.date || !x.start || x.date < td) return;
     const [h, m] = String(x.start).split(':').map(Number), s = parse(x.date); s.setHours(h || 0, m || 0, 0, 0);
     if (s.getTime() + (x.dur || 60) * 60000 > now) items.push({s: s.getTime(), who: p.name, x});
@@ -1036,9 +1054,10 @@ function crewPanel(){
     const day = dd === 0 ? t('today') : dd === 1 ? t('tomorrow') : `${dn(wdOf(x.date))} ${fmtDM(parse(x.date))}`;
     return `<div class="r"><span class="d" style="--c:${safeColor(x.color)}"><b>${esc(cslim(who))}</b> · ${esc(day)} ${esc(cslim(x.start))}</span><span>${esc(cslim(x.name))}${x.loc ? ' · ' + esc(cslim(x.loc)) : ''}</span></div>`;
   }).join('');
-  const tabs = CREWS.length > 1 ? `<div class="ctabs">${CREWS.map(x => `<button data-act="cact" data-id="${esc(x.id)}" class="${x.id === CREW.id ? 'on' : ''}">${esc(x.name || 'Crew')}</button>`).join('')}</div>` : '';
-  const last = CLAST ? `<div class="cl">💬 <b>${esc(CLAST.name)}:</b> ${esc(CLAST.text)}</div>` : `<div class="cl" style="opacity:.6">💬 ${t('c_chatNone')}</div>`;
-  return `<div class="panel cp"><small>${t('c_title')} · ${esc(CREW.name || '')} · ${t('c_members', (CREW.members || []).length)}</small>${tabs}<div class="rows">${rows || `<p class="hint" style="color:var(--mut);margin:6px 0 2px">${t('c_homeNone')}</p>`}</div>${last}<div class="cbtns">${btn('hchat', t('c_btnChat'), true)}${btn('hweek', t('c_btnWeek'))}${btn('hmenu', t('c_btnMenu'))}</div></div>`;
+  const tabs = crews.length > 1 ? `<div class="ctabs">${crews.map(x => `<button data-act="cact" data-id="${esc(x.id)}" class="${x.id === actId ? 'on' : ''}">${esc(x.name || 'Crew')}</button>`).join('')}</div>` : '';
+  const lastHtml = last ? `<div class="cl">💬 <b>${esc(cslim(last.name))}:</b> ${esc(String(last.text || '').slice(0, 90))}</div>` : `<div class="cl" style="opacity:.6">💬 ${t('c_chatNone')}</div>`;
+  const status = CREW ? '' : (CERR ? `<div class="cl" style="color:#ff9a8f;white-space:normal">⚠ ${esc(CERR.slice(0, 50))} <u data-act="hreload">${t('c_retry')}</u></div>` : `<div class="cl" style="opacity:.6">${t('c_loading')}</div>`);
+  return `<div class="panel cp"><small>${t('c_title')} · ${esc(cur.name || '')}${nMem ? ' · ' + t('c_members', nMem) : ''}</small>${tabs}<div class="rows">${rows || `<p class="hint" style="color:var(--mut);margin:6px 0 2px">${t('c_homeNone')}</p>`}</div>${status}${lastHtml}<div class="cbtns">${btn('hchat', t('c_btnChat'), true)}${btn('hweek', t('c_btnWeek'))}${btn('hmenu', t('c_btnMenu'))}</div></div>`;
 }
 function crewBlocks(){
   const g = {};
@@ -1090,7 +1109,7 @@ async function crewAct(a, el){
         await fs.setDoc(fs.doc(db, 'crews', code), {name: n.slice(0, 30), owner: ME.uid, members: [ME.uid], created: fs.serverTimestamp()});
         await setProfile({crewIds: [...(PROF.crewIds || []), code]});
         S.settings.actCrew = code; S.settings.crewOn = true; save();
-        await loadCrewState(); publishPlan(); return showCrew(); }
+        await loadCrewState(); render(); publishPlan(); return showCrew(); }
       case 'cjoin': {
         const code = v('c-code').toUpperCase().replace(/[^A-Z0-9]/g, ''), {fs, db} = FB;
         if (code.length !== 8) return toast(t('c_wrongCode'));
@@ -1103,7 +1122,7 @@ async function crewAct(a, el){
         }
         await setProfile({crewIds: [...new Set([...(PROF.crewIds || []), code])]});
         S.settings.actCrew = code; S.settings.crewOn = true; save();
-        await loadCrewState(); publishPlan(); return showCrew(); }
+        await loadCrewState(); render(); publishPlan(); return showCrew(); }
       case 'ccopy':
         try { await navigator.clipboard.writeText(CREW.id); } catch(e){}
         return toast(t('c_copied'));
@@ -1123,6 +1142,7 @@ async function crewAct(a, el){
       case 'hchat': if (!(FB && ME && CREW)) return openCrew(); return openChat('crew', t('c_chat'), 'close');
       case 'hweek': if (!(FB && ME && CREW)) return openCrew(); cmon = mondayOf(new Date()); return showCrewWeek();
       case 'hmenu': return openCrew();
+      case 'hreload': CERR = ''; crewReady = false; render(); return crewStart();
       case 'addcrew': {
         const d = el.dataset, name = cslim(d.name), loc = cslim(d.loc), color = safeColor(d.color);
         const start = /^\d\d:\d\d$/.test(d.start) ? d.start : '18:00', dur = Math.min(600, Math.max(0, parseInt(d.dur, 10) || 60));
@@ -1136,16 +1156,16 @@ async function crewAct(a, el){
       case 'cmdel': { const {fs, db} = FB; await fs.deleteDoc(fs.doc(db, 'crews', CREW.id, 'messages', el.dataset.id)); return; }
       case 'cleave':
         if (!confirm(t('c_leaveQ'))) return;
-        await leaveCrew(); S.settings.crewOn = CREWS.length > 0; save(); toast(t('c_left')); render(); return showCrew();
+        await leaveCrew(); S.settings.crewOn = CREWS.length > 0; save(); toast(t('c_left')); crewRefresh(); render(); return showCrew();
       case 'clogout':
-        await FB.au.signOut(FB.auth); ME = null; PROF = null; CREW = null; S.settings.crewOn = false; save(); return loginSheet();
+        await FB.au.signOut(FB.auth); ME = null; PROF = null; CREW = null; CREWS = []; CPALL = {}; CPLANS = []; CLAST = null; delete S.settings.cc; S.settings.crewOn = false; save(); render(); return loginSheet();
       case 'cdel': {
         if (!confirm(t('c_delQ'))) return;
         const {fs, db} = FB;
         for (const cr of CREWS.slice()) await leaveCrew(cr);
         try { await fs.deleteDoc(fs.doc(db, 'users', ME.uid)); } catch(e){}
         await FB.au.deleteUser(FB.auth.currentUser);
-        ME = null; PROF = null; CREW = null; S.settings.crewOn = false; save();
+        ME = null; PROF = null; CREW = null; CREWS = []; CPALL = {}; CPLANS = []; CLAST = null; delete S.settings.cc; S.settings.crewOn = false; save(); render();
         toast(t('c_deleted')); return closeSheet(); }
     }
   } catch(e){ cerr(e); }
@@ -1186,8 +1206,8 @@ applySplash();
   };
   setTimeout(hide, 2600); sp.addEventListener('click', hide);
 })();
-document.addEventListener('visibilitychange', () => { if (!document.hidden){ if (typeof crewRefresh === 'function' && S.settings.crewOn) crewRefresh(); if (page === 'home') render(); } });
-if (S.settings.crewOn && S.settings.crewConsent) crewInit().then(crewRefresh).catch(() => {});
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ if (typeof crewRefresh === 'function' && S.settings.crewConsent){ if (crewReady) crewRefresh(); else crewStart(); } if (page === 'home') render(); } });
+if (S.settings.crewConsent) crewStart();
 render();
 if ('serviceWorker' in navigator){
   const had = !!navigator.serviceWorker.controller;
