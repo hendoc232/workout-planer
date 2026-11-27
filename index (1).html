@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#150b3c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Workout</title>
+<style>
+:root{--ink:#150b3c;--chalk:#efe9e0;--uv:#4a2fe0;--coral:#ff5a4a;--mut:#b4aed3;--line:rgba(255,255,255,.14);--ok:#46e8c4;
+  --disp:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;height:var(--H,100%);margin:0;position:relative;overflow:hidden;overscroll-behavior:none;color:#fff;font:16px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  background:radial-gradient(120% 55% at 15% -8%,#4b2cb8 0%,rgba(75,44,184,0) 62%),linear-gradient(180deg,#1b0f4a 0%,#150b3c 55%,#0d0726 100%) #150b3c}
+body::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.22;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.glow{position:absolute;left:-15%;right:-15%;bottom:-22vh;height:50vh;z-index:0;pointer-events:none;border-radius:50%;opacity:.62;filter:blur(55px);
+  background:linear-gradient(95deg,#ff7a45 0%,#ffc53d 22%,#4be3a3 42%,#3da5ff 62%,#8b5cff 82%,#ff6ad5 100%)}
+input,select{-webkit-user-select:text;user-select:text}
+#app{position:relative;z-index:1;height:100vh;height:var(--H,100dvh);max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:7px;padding:calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 10px)}
+button,input,select{font:inherit;color:inherit}
+button{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 12px;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+button:active{opacity:.7}
+.top{display:flex;align-items:center;justify-content:space-between;flex:none}
+.top button{width:42px;height:42px;font-size:22px;padding:0;line-height:1}
+.ttl{text-align:center;line-height:1.05}
+.ttl b{display:inline-block;position:relative;font:italic 900 30px/1 var(--disp);letter-spacing:-.5px;padding-right:16px;
+  background:linear-gradient(180deg,#fff 20%,#b7b1da 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ttl b::after{content:"✦";position:absolute;right:0;top:-4px;font-size:15px;-webkit-text-fill-color:#fff;color:#fff}
+.ttl span{display:block;margin-top:3px;color:var(--mut);font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.pill{flex:none;background:var(--coral);border-color:var(--coral);color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:8px}
+.days{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.day{flex:1;min-height:0;display:flex;align-items:stretch;gap:8px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:18px;padding:5px 6px 5px 10px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.day.today{border-color:var(--coral);box-shadow:0 0 0 1px var(--coral) inset,0 0 20px rgba(255,90,74,.35)}
+.day.drop{outline:2px dashed #fff;outline-offset:-3px;background:rgba(255,255,255,.18)}
+.dl{width:38px;display:flex;flex-direction:column;justify-content:center;flex:none}
+.dl b{font:italic 900 17px/1.1 var(--disp)}.dl small{color:var(--mut);font-size:10.5px;font-weight:600;letter-spacing:.04em}
+.chips{flex:1;min-width:0;display:flex;gap:6px;align-items:stretch}
+.free{flex:1;display:flex;align-items:center;color:rgba(255,255,255,.3);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.chip2{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 55%,#1a0f4f) 0%,color-mix(in srgb,var(--c) 22%,#150b3c) 100%);
+  border:1px solid color-mix(in srgb,var(--c) 75%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--c) 30%,transparent);
+  border-radius:14px;padding:3px 9px;touch-action:none;cursor:grab;overflow:hidden}
+.chip2 b{font:italic 800 14.5px/1.12 var(--disp);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.chip2 .meta{display:flex;align-items:center;gap:6px;min-width:0}
+.tm{flex:none;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800;letter-spacing:.06em}
+.tm:active{background:rgba(255,255,255,.4)}
+.lc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:700;color:rgba(255,255,255,.82);letter-spacing:.03em}
+.big{font:italic 900 52px/1 var(--disp);text-align:center;margin:6px 0 10px;letter-spacing:-1px}
+.step{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.step button{padding:11px 0;font-size:14px;font-weight:700}
+.chip2 i{position:absolute;top:3px;right:8px;font-style:normal;font-size:11px;font-weight:800}
+.chip2 i.ok{color:var(--ok)}.chip2 i.no{color:rgba(255,255,255,.5)}.chip2 i.open{color:#ffd0c9}
+.chip2.lift{opacity:.25}
+.chip2.ghost{position:fixed;z-index:50;pointer-events:none;opacity:.95;box-shadow:0 10px 28px rgba(0,0,0,.55);transform:scale(1.04);margin:0}
+.add{width:32px;align-self:center;height:32px;padding:0;border-radius:50%;font-size:20px;line-height:1;flex:none}
+.bar{display:grid;grid-template-columns:auto 1fr 1fr 1.4fr auto;gap:6px;flex:none}
+.bar button{background:rgba(21,11,60,.6);padding:12px 8px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.primary{background:var(--uv)!important;border-color:var(--uv)!important;color:#fff!important;font-weight:800}
+#sheetBg{position:absolute;inset:0;background:rgba(10,5,35,.65);display:flex;align-items:flex-end;justify-content:center;z-index:10;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#sheetBg.hidden{display:none}
+.sheet{background:var(--chalk);color:var(--ink);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 20px)}
+.sheet h3{margin:0 0 10px;font:italic 900 26px/1.1 var(--disp);letter-spacing:-.3px}
+.sheet h4{margin:16px 0 6px;color:#6b6478;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.14em}
+.sheet button{background:#fff;border:1px solid #d9d1c5;color:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none;font-weight:600}
+.sheet .on{background:var(--uv)!important;border-color:var(--uv)!important;color:#fff!important}
+.pend{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #ddd5c9}
+.pend:first-of-type{border-top:0}
+.pend .n{flex:1;min-width:0}.pend .n small{display:block;color:#6b6478}
+.pend button{padding:9px 16px}
+.bb{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin-bottom:6px;border-radius:16px!important;border-left:8px solid var(--c)!important}
+.bb small{color:#6b6478;margin-left:auto;font-size:12px}
+label{display:block;margin:12px 0 4px;color:#6b6478;font-size:12px;font-weight:700;letter-spacing:.06em}
+input[type=text],input[type=time],input[type=number],select{width:100%;background:#fff;color:var(--ink);border:1px solid #d9d1c5;border-radius:12px;padding:10px;font-size:16px}
+input[type=color]{width:100%;height:42px;background:#fff;border:1px solid #d9d1c5;border-radius:12px;padding:3px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 4px;font-size:14px}
+.days7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.days7 button{padding:9px 0;font-size:13px}
+.btnrow{display:flex;gap:8px;margin-top:18px}.btnrow button{flex:1;padding:12px 10px}
+.sheet .danger{color:#d93a2b}
+.hint{color:#6b6478;font-size:13px;margin:6px 0 0}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px 3px;text-align:center;border-bottom:1px solid #ddd5c9}
+td:first-child,th:first-child{text-align:left}td.z{color:#bdb4a6}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 84px);transform:translateX(-50%);background:var(--chalk);color:var(--ink);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:60;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+
+#splash{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .6s ease;
+  background:radial-gradient(120% 55% at 15% -8%,#4b2cb8 0%,rgba(75,44,184,0) 62%),linear-gradient(180deg,#1b0f4a 0%,#150b3c 55%,#0d0726 100%) #150b3c}
+#splash.out{opacity:0;pointer-events:none}
+#splash::before{content:"";position:absolute;left:-15%;right:-15%;bottom:-24vh;height:54vh;border-radius:50%;opacity:.85;filter:blur(55px);
+  background:linear-gradient(95deg,#ff7a45 0%,#ffc53d 22%,#4be3a3 42%,#3da5ff 62%,#8b5cff 82%,#ff6ad5 100%)}
+.sp{position:relative;text-align:center;animation:spin 1s cubic-bezier(.2,.8,.2,1) both}
+.sp span{display:block;font:italic 900 min(15vw,64px)/1.02 var(--disp);letter-spacing:-1px}
+.sp .w1{background:linear-gradient(180deg,#fff 20%,#b7b1da 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp .w2{background:linear-gradient(95deg,#ff9a5a,#ffd35a,#6ff0b5,#59b7ff,#a98aff,#ff8ae0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp i{position:absolute;right:-6px;top:-22px;font-style:normal;font-size:34px;color:#fff;animation:tw 1.6s ease-in-out infinite}
+.sp small{display:block;margin-top:18px;color:var(--mut);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+@keyframes spin{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes tw{0%,100%{transform:scale(.8) rotate(0);opacity:.7}50%{transform:scale(1.15) rotate(20deg);opacity:1}}
+.home{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.next{flex:1.2;min-height:0;max-height:270px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:14px 16px;border-radius:24px;cursor:pointer;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 60%,#1a0f4f) 0%,color-mix(in srgb,var(--c) 22%,#150b3c) 100%);
+  border:1px solid color-mix(in srgb,var(--c) 75%,transparent);box-shadow:0 0 28px color-mix(in srgb,var(--c) 35%,transparent)}
+.next .lbl{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.next .nm{font:italic 900 clamp(28px,9vw,40px)/1.05 var(--disp);letter-spacing:-.5px}
+.next .meta{display:flex;align-items:center;gap:8px;min-width:0}
+.next .meta .t{flex:none;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.32);border-radius:999px;padding:4px 12px;font-weight:800;letter-spacing:.06em}
+.next .when{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:700;color:rgba(255,255,255,.9)}
+.next .when em{font-style:normal;background:var(--coral);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.next.none{--c:#6c63b5;cursor:default}
+.tiles{display:grid;grid-template-columns:1.1fr 1fr 1.3fr;gap:8px;flex:none}
+.tile{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:18px;padding:10px 12px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);min-width:0}
+.tile small{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.tile b{display:block;font:italic 900 26px/1.15 var(--disp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile b.sm{font-size:16px;line-height:1.7}
+.prog{height:6px;border-radius:99px;background:rgba(255,255,255,.14);margin-top:4px;overflow:hidden}.prog i{display:block;height:100%;background:var(--coral);border-radius:99px}
+.panel{flex:1;min-height:0;max-height:260px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:20px;padding:10px 14px 8px;display:flex;flex-direction:column;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.panel small{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.bars{flex:1;min-height:0;display:flex;align-items:flex-end;gap:10px;padding-top:6px}
+.bc{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;min-width:0}
+.bc .v{font-size:12px;font-weight:800}.bc .b{width:100%;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#8b6cff,#4a2fe0);min-height:4px}
+.bc.cur .b{background:linear-gradient(180deg,#ff8a7a,#ff5a4a)}.bc .k{font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.06em}
+.big-btn{padding:16px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;flex:none}
+.bar .ic{padding:12px 11px;font-size:15px}
+
+a{color:var(--uv);font-weight:700}
+.lb{display:block;width:100%;text-align:left;margin-bottom:8px;border-radius:16px!important;padding:14px 16px;font-size:16px}
+.doc h4:first-child{margin-top:4px}
+.doc p{margin:0 0 10px;font-size:14px;line-height:1.5}
+.doc ul{margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.5}
+.gi{background:#fff;border:1px solid #d9d1c5;border-radius:16px;padding:11px 14px;margin-bottom:8px}
+.gi b{display:block;font:italic 800 16px/1.2 var(--disp);margin-bottom:3px}.gi p{margin:0;font-size:14px;line-height:1.45;color:#3b3552}
+.seg2{display:flex;gap:6px}.seg2 button{flex:1;padding:10px 4px}
+.copy{margin-top:14px;font-size:13px;color:#6b6478}
+</style>
+</head>
+<body>
+<div id="splash"><div class="sp"><i>✦</i><span class="w1">WELCOME</span><span class="w2" id="sp2">ATHLET</span><small id="sp3">Let’s train</small></div></div>
+<div class="glow"></div>
+<div id="app"></div>
+<div id="sheetBg" class="hidden"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* ---------- App-Infos ---------- */
+const VERSION = '1.1.0', RELEASED = '26.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
+
+/* ---------- Helfer ---------- */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const mondayOf = d => { const x = new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate() - (x.getDay()+6)%7); return x; };
+const wdOf = s => (parse(s).getDay()+6)%7;
+const todayStr = () => ymd(new Date());
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function isoWeek(d){
+  const t = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay()||7));
+  const y = t.getUTCFullYear();
+  const w = Math.ceil(((t - Date.UTC(y,0,1))/864e5 + 1)/7);
+  return {y, w, key:`${y}-W${pad(w)}`};
+}
+
+/* ---------- Daten ---------- */
+const KEY = 'workout_planer_v1';
+function seed(){
+  const blocks = [
+    {id:'squat', name:'Backsquat', loc:'Gym Evo Rosa', color:'#ff5a4a', start:'18:00', dur:90, sync:true},
+    {id:'dead',  name:'Deadlift',  loc:'Gym Evo Rosa', color:'#ff5a4a', start:'18:00', dur:90, sync:true},
+    {id:'jerk',  name:'Split Jerk',loc:'Gym Evo Rosa', color:'#ff5a4a', start:'18:00', dur:90, sync:true},
+    {id:'gren',  name:'CrossFit',  loc:'CrossFit Grenzgänger', color:'#7b61ff', start:'08:00', dur:60, sync:true},
+    {id:'cfm',   name:'Strength',  loc:'CrossFit CFM', color:'#3be8c8', start:'17:00', dur:60, sync:true},
+    {id:'oly',   name:'Olympic Weightlifting', loc:'CrossFit Grenzgänger', color:'#7b61ff', start:'11:00', dur:90, sync:true},
+    {id:'pil',   name:'Hot Pilates', loc:'Sunyoga', color:'#ffb02e', start:'12:15', dur:60, sync:true},
+    {id:'run',   name:'Laufen', loc:'', color:'#b6f24a', start:'07:00', dur:45, sync:true},
+    {id:'yoga',  name:'Yoga', loc:'', color:'#ff7ad9', start:'19:00', dur:60, sync:true},
+    {id:'rest',  name:'Restday', loc:'', color:'#9a96b5', start:'00:00', dur:0, sync:false}
+  ];
+  const plan = [['2026-11-30','squat','18:00'],['2026-12-01','jerk','18:00'],['2026-12-02','gren','08:00'],
+                ['2026-12-03','dead','18:00'],['2026-12-04','cfm','17:00'],['2026-12-05','pil','12:15'],['2026-12-06','oly','11:00']];
+  const entries = plan.map(([date,blockId,start]) => {
+    const b = blocks.find(x => x.id === blockId);
+    return {id:uid(), blockId, date, start, dur:b.dur, done:null};
+  });
+  return {blocks, entries, settings:{}};
+}
+let S = (() => { try { const j = JSON.parse(localStorage.getItem(KEY)); if (j && j.blocks && j.entries) return j; } catch(e){} return seed(); })();
+S.settings = S.settings || {};
+delete S.settings.clientId; delete S.settings.calendarId;   // Google-Sync wurde entfernt
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast(t('saveFail')); } };
+const blockOf = e => S.blocks.find(b => b.id === e.blockId);
+const entryById = id => S.entries.find(e => e.id === id);
+// Anzeige-Werte eines Termins: eigene Anpassung hat Vorrang vor dem Baustein
+const look = e => { const b = blockOf(e); return {name: e.name || b.name, loc: e.loc !== undefined ? e.loc : b.loc, color: e.color || b.color}; };
+let view = {mon: mondayOf(new Date())};
+let page = 'home';
+
+/* ---------- Sprache ---------- */
+const MON_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const LANGS = ['de','en'];
+const L = () => (S.settings.lang && LANGS.includes(S.settings.lang)) ? S.settings.lang : ((navigator.language || 'de').toLowerCase().startsWith('de') ? 'de' : 'en');
+const T = {
+ de: {
+  sp2:'ATHLET', sp3:'Let’s train', athlete:'ATHLET',
+  days:['Mo','Di','Mi','Do','Fr','Sa','So'], dayfull:['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'],
+  wk:'KW', today:'Heute', tomorrow:'Morgen', stats:'Stats', blocks:'Bausteine', free:'Frei',
+  confirmN:n => `✓ ${n} Einheit${n>1?'en':''} bestätigen`,
+  next:'Nächstes Workout', none:'Noch nichts geplant', noneHint:'Plane deine Woche im Wochenplan',
+  thisWeek:'Diese Woche', total:'Gesamt', most:'Meistgemacht', perWeek:'Erledigt pro Woche', openWeek:'Wochenplan öffnen',
+  running:'Läuft gerade', inMin:n => `in ${n} Min`, inHM:(h,m) => `in ${h} Std ${m} Min`, inDays:n => `in ${n} Tagen`,
+  addTitle:d => `Hinzufügen · ${d}`, suggestions:'Vorschläge (gelernt)', allBlocks:'Alle Bausteine', cancel:'Abbrechen',
+  sugInfo:(n,d,tm) => `${n}× ${d} · meist ${tm}`, min:'min',
+  template:'Vorlage (Baustein)', wtype:'Trainingstyp', loc:'Ort', noLoc:'kein Ort', start:'Start', durMin:'Dauer (min)', color:'Farbe', day:'Tag', status:'Status',
+  open:'Offen', done:'Gemacht', notDone:'Nicht gemacht',
+  learnHint:'Fürs Lernen zählt eine Einheit erst, wenn der Tag vorbei ist und sie als „Gemacht“ bestätigt wurde.',
+  overrideHint:'Änderungen an Typ, Ort und Farbe gelten nur für diesen Termin. Den Baustein selbst änderst du unter „Bausteine“.',
+  saveAsBlock:'Als neuen Baustein speichern', resetBlock:'Auf Baustein zurücksetzen', del:'Löschen', close:'Schließen', ok:'Fertig',
+  confirmDel:'Eintrag löschen?', newBlockSaved:'Neuer Baustein gespeichert',
+  m1h:'−1 Std', p1h:'+1 Std', exact:'Genaue Uhrzeit', durTitle:n => `Dauer · ${n} min`,
+  pendTitle:'Gemacht?', pendHint:'Bestätigte Einheiten fließen ins Lernen ein.',
+  statsTitle:'Statistik', statsHint:n => `${n} bestätigte Einheiten aus vergangenen Tagen. Nur diese fließen in die Vorschläge ein.`,
+  statsEmpty:'Noch nichts gezählt. Bestätige vergangene Einheiten mit ✓, dann beginnt die App zu lernen.',
+  blocksTitle:'Bausteine', archived:'archiviert', noTime:'ohne Uhrzeit', newBlock:'+ Neuer Baustein', newBlockTitle:'Neuer Baustein', editBlockTitle:'Baustein bearbeiten',
+  name:'Name', namePh:'z. B. Backsquat', locPh:'z. B. Gym Evo Rosa', defStart:'Standard-Start', hasTime:'Mit Uhrzeit (aus = z. B. Restday)',
+  archive:'Archivieren', restore:'Wiederherstellen', save:'Speichern', needName:'Bitte einen Namen eingeben',
+  settingsTitle:'Einstellungen', language:'Sprache', exportH:'Export', icsBtn:'Woche als .ics exportieren', backupH:'Backup', backupBtn:'Daten sichern', restoreBtn:'Daten laden',
+  backupHint:'Alle Daten liegen nur auf diesem Gerät (in der Homescreen-App). Sichere sie ab und zu.', infoBtn:'Info & Rechtliches',
+  restored:'Daten geladen', importFail:'Import fehlgeschlagen: ', invalidFile:'Ungültige Datei', saveFail:'Speichern fehlgeschlagen', noEvents:'Keine Termine in dieser Woche',
+  updated:'Neue Version geladen – bitte App neu starten',
+  infoTitle:'Info', version:'Version', guide:'Anleitung', changelog:'Versionshinweise', privacy:'Datenschutz', terms:'Haftungsausschluss', contact:'Kontakt & Copyright',
+  back:'‹ Zurück', letsgo:'Los geht’s', rights:'Alle Rechte vorbehalten.', contactLbl:'Kontakt',
+  guideItems:[
+   ['Wochenplan','Mit + legst du Bausteine auf einen Tag. Mit ‹ › wechselst du die Woche, „Heute“ springt zur aktuellen Woche.'],
+   ['Verschieben','Ziehe einen Baustein mit dem Finger auf einen anderen Tag. Er springt dorthin.'],
+   ['Uhrzeit ändern','Tippe auf die Uhrzeit im Baustein. Dort stellst du Start und Dauer schnell mit den Schaltflächen oder genau ein.'],
+   ['Einzelnen Termin anpassen','Tippe auf den Baustein selbst. Du änderst Trainingstyp, Ort, Farbe, Zeit, Tag und Status nur für diesen Termin. „Als neuen Baustein speichern“ macht daraus eine Vorlage.'],
+   ['Bausteine','Unter „Bausteine“ legst du Vorlagen an und änderst sie. Änderungen gelten für alle Termine, die du nicht einzeln angepasst hast.'],
+   ['Bestätigen & Lernen','Bestätige vergangene Einheiten mit ✓. Sie füllen die Statistik, und für die Vorschläge beim + zählen sie, sobald der Tag vorbei ist.'],
+   ['Startseite','Zeigt dein nächstes Workout und deine Statistik. Mit ⌂ kommst du jederzeit dorthin zurück.'],
+   ['Deine Daten','Alles bleibt auf deinem Gerät. Sichere es unter ⚙︎ → Daten sichern. Öffne die App immer über das Homescreen-Symbol, denn Safari speichert getrennt.']
+  ],
+  changes:[
+   ['1.1.0','26.11.2026',['Sprache Deutsch/Englisch umschaltbar','Info-Bereich mit Anleitung, Datenschutz, Haftungsausschluss und Kontakt','Hinweis, wenn eine neue Version geladen wurde','Google-Kalender-Sync entfernt, der .ics-Export bleibt in den Einstellungen','Korrektur: Hintergrund reicht auf dem iPhone bis ganz nach unten']],
+   ['1.0.0','25.11.2026',['Wochenplan mit Verschieben per Finger','Startseite mit nächstem Workout und Statistik','Uhrzeit-Schnellwahl und individuelle Anpassung pro Termin','Lernende Vorschläge aus bestätigten Einheiten']]
+  ],
+  privacyDoc:[
+   ['Verantwortlicher',`${AUTHOR}, E-Mail: ${CONTACT}`],
+   ['Kurzfassung','Diese App speichert deine Eingaben nur lokal auf deinem Gerät. Es gibt keine Konten, keine Datenbank beim Betreiber, keine Werbung und kein Tracking. Der Betreiber erhebt selbst keine personenbezogenen Daten von dir.'],
+   ['Lokale Speicherung','Pläne, Bausteine und Einstellungen liegen im Speicher deines Browsers bzw. der Homescreen-App (localStorage) und im Cache der App, damit sie auch offline startet. Diese Daten verlassen dein Gerät nicht. Du kannst sie über ⚙︎ → Daten sichern exportieren und durch Löschen der App bzw. der Website-Daten entfernen.'],
+   ['Hosting','Die App wird über GitHub Pages ausgeliefert. Beim Aufruf verarbeitet GitHub technisch notwendige Verbindungsdaten (z. B. IP-Adresse, Zeitpunkt, Browserinformationen) in Server-Protokollen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (sicherer und effizienter Betrieb). Dabei kann eine Übermittlung in die USA stattfinden. Details findest du in den Datenschutzhinweisen von GitHub.'],
+   ['Drittanbieter','Die App lädt keine Schriftarten, Skripte oder Tracker von Dritten nach.'],
+   ['Deine Rechte','Du kannst deine Daten direkt in der App einsehen, exportieren und löschen. Zur Ausübung deiner Rechte nach der DSGVO (Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit) schreib an die oben genannte E-Mail-Adresse. Du hast außerdem das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.'],
+   ['Änderungen','Sollten künftig Funktionen wie Konten oder Chat hinzukommen, wird diese Erklärung vorher angepasst. Stand: 26.11.2026.']
+  ],
+  termsDoc:[
+   ['Privates Projekt','Diese App ist ein privates Hobbyprojekt und wird unentgeltlich zur Verfügung gestellt.'],
+   ['Keine Beratung','Die App ersetzt keine ärztliche, therapeutische oder trainingswissenschaftliche Beratung. Training erfolgt auf eigene Verantwortung. Bei gesundheitlichen Beschwerden hol dir ärztlichen Rat.'],
+   ['Keine Gewähr','Für Richtigkeit, Verfügbarkeit und Vollständigkeit wird keine Gewähr übernommen. Daten können verloren gehen, zum Beispiel wenn Website-Daten gelöscht werden. Sichere sie deshalb regelmäßig.'],
+   ['Haftung','Die Haftung ist, soweit gesetzlich zulässig, auf Vorsatz und grobe Fahrlässigkeit beschränkt. Unberührt bleibt die Haftung für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie nach zwingenden gesetzlichen Vorschriften.']
+  ]
+ },
+ en: {
+  sp2:'ATHLETE', sp3:'Let’s train', athlete:'ATHLETE',
+  days:['Mo','Tu','We','Th','Fr','Sa','Su'], dayfull:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+  wk:'Wk', today:'Today', tomorrow:'Tomorrow', stats:'Stats', blocks:'Blocks', free:'Free',
+  confirmN:n => `✓ Confirm ${n} session${n>1?'s':''}`,
+  next:'Next workout', none:'Nothing planned yet', noneHint:'Plan your week in the weekly plan',
+  thisWeek:'This week', total:'Total', most:'Most done', perWeek:'Done per week', openWeek:'Open weekly plan',
+  running:'In progress', inMin:n => `in ${n} min`, inHM:(h,m) => `in ${h}h ${m}m`, inDays:n => `in ${n} days`,
+  addTitle:d => `Add · ${d}`, suggestions:'Suggestions (learned)', allBlocks:'All blocks', cancel:'Cancel',
+  sugInfo:(n,d,tm) => `${n}× ${d} · usually ${tm}`, min:'min',
+  template:'Template (block)', wtype:'Workout type', loc:'Location', noLoc:'no location', start:'Start', durMin:'Duration (min)', color:'Color', day:'Day', status:'Status',
+  open:'Open', done:'Done', notDone:'Not done',
+  learnHint:'For learning, a session only counts once the day is over and it is confirmed as “Done”.',
+  overrideHint:'Changes to type, location and color apply to this session only. Edit the block itself under “Blocks”.',
+  saveAsBlock:'Save as new block', resetBlock:'Reset to block', del:'Delete', close:'Close', ok:'Done',
+  confirmDel:'Delete this entry?', newBlockSaved:'New block saved',
+  m1h:'−1 h', p1h:'+1 h', exact:'Exact time', durTitle:n => `Duration · ${n} min`,
+  pendTitle:'Did you do it?', pendHint:'Confirmed sessions feed the learning.',
+  statsTitle:'Statistics', statsHint:n => `${n} confirmed sessions from past days. Only these feed the suggestions.`,
+  statsEmpty:'Nothing counted yet. Confirm past sessions with ✓ and the app starts learning.',
+  blocksTitle:'Blocks', archived:'archived', noTime:'no time', newBlock:'+ New block', newBlockTitle:'New block', editBlockTitle:'Edit block',
+  name:'Name', namePh:'e.g. Back squat', locPh:'e.g. My gym', defStart:'Default start', hasTime:'Has a time (off = e.g. rest day)',
+  archive:'Archive', restore:'Restore', save:'Save', needName:'Please enter a name',
+  settingsTitle:'Settings', language:'Language', exportH:'Export', icsBtn:'Export week as .ics', backupH:'Backup', backupBtn:'Back up data', restoreBtn:'Restore data',
+  backupHint:'All data stays on this device (in the home-screen app). Back it up now and then.', infoBtn:'Info & legal',
+  restored:'Data restored', importFail:'Import failed: ', invalidFile:'Invalid file', saveFail:'Saving failed', noEvents:'No events this week',
+  updated:'New version loaded – please restart the app',
+  infoTitle:'Info', version:'Version', guide:'How to use', changelog:'What’s new', privacy:'Privacy', terms:'Disclaimer', contact:'Contact & copyright',
+  back:'‹ Back', letsgo:'Let’s go', rights:'All rights reserved.', contactLbl:'Contact',
+  guideItems:[
+   ['Weekly plan','Tap + to put blocks on a day. ‹ › switches the week, “Today” jumps to the current week.'],
+   ['Moving','Drag a block with your finger onto another day. It jumps there.'],
+   ['Changing the time','Tap the time in a block. There you set start and duration quickly with the buttons or exactly.'],
+   ['Editing a single session','Tap the block itself. You change workout type, location, color, time, day and status for this session only. “Save as new block” turns it into a template.'],
+   ['Blocks','Under “Blocks” you create and edit templates. Changes apply to all sessions you have not edited individually.'],
+   ['Confirming & learning','Confirm past sessions with ✓. They fill the statistics, and they count for the suggestions at + once the day is over.'],
+   ['Home','Shows your next workout and your statistics. ⌂ takes you back there at any time.'],
+   ['Your data','Everything stays on your device. Back it up under ⚙︎ → Back up data. Always open the app from the home-screen icon, because Safari stores data separately.']
+  ],
+  changes:[
+   ['1.1.0','26.11.2026',['Switch between German and English','Info section with guide, privacy, disclaimer and contact','Notice when a new version has been loaded','Google Calendar sync removed, the .ics export stays in settings','Fix: background now reaches the bottom on iPhone']],
+   ['1.0.0','25.11.2026',['Weekly plan with finger drag and drop','Home screen with next workout and statistics','Quick time picker and per-session edits','Learning suggestions from confirmed sessions']]
+  ],
+  privacyDoc:[
+   ['Controller',`${AUTHOR}, email: ${CONTACT}`],
+   ['Summary','This app stores your entries only locally on your device. There are no accounts, no database at the operator, no ads and no tracking. The operator does not collect any personal data about you.'],
+   ['Local storage','Plans, blocks and settings are kept in the storage of your browser or home-screen app (localStorage) and in the app cache, so that it also starts offline. This data does not leave your device. You can export it via ⚙︎ → Back up data and remove it by deleting the app or the website data.'],
+   ['Hosting','The app is served via GitHub Pages. When you open it, GitHub processes technically necessary connection data (e.g. IP address, time, browser information) in server logs. The legal basis is Art. 6(1)(f) GDPR (secure and efficient operation). A transfer to the USA may take place. See GitHub’s privacy statement for details.'],
+   ['Third parties','The app does not load fonts, scripts or trackers from third parties.'],
+   ['Your rights','You can view, export and delete your data directly in the app. To exercise your rights under the GDPR (access, rectification, erasure, restriction, objection, data portability), write to the email address above. You also have the right to lodge a complaint with a data protection authority.'],
+   ['Changes','If features such as accounts or chat are added in the future, this notice will be updated beforehand. Last updated: 26 Nov 2026.']
+  ],
+  termsDoc:[
+   ['Private project','This app is a private hobby project and is provided free of charge.'],
+   ['No advice','The app does not replace medical, therapeutic or sports-science advice. You train at your own risk. If you have health problems, seek medical advice.'],
+   ['No warranty','No warranty is given for correctness, availability or completeness. Data can be lost, for example when website data is deleted. Please back it up regularly.'],
+   ['Liability','To the extent permitted by law, liability is limited to intent and gross negligence. Liability for injury to life, body or health and liability under mandatory law remain unaffected.']
+  ]
+ }
+};
+const t = (k, ...a) => { const v = (T[L()][k] !== undefined) ? T[L()][k] : T.de[k]; return typeof v === 'function' ? v(...a) : v; };
+const dn = i => T[L()].days[i];
+const fmtDM = d => L() === 'de' ? `${pad(d.getDate())}.${pad(d.getMonth()+1)}` : `${d.getDate()} ${MON_EN[d.getMonth()]}`;
+const fmtDMY = d => L() === 'de' ? `${fmtDM(d)}.${d.getFullYear()}` : `${fmtDM(d)} ${d.getFullYear()}`;
+function applySplash(){ const a = $('#sp2'), b = $('#sp3'); if (a) a.textContent = t('sp2'); if (b) b.textContent = t('sp3'); document.documentElement.lang = L(); }
+
+/* ---------- Lernen: zählt nur bestätigte Einheiten vergangener Tage ---------- */
+const counted = () => { const td = todayStr(); return S.entries.filter(e => e.done === true && e.date < td && blockOf(e)); };
+function learnedTime(blockId, wd){
+  const b = S.blocks.find(x => x.id === blockId);
+  const c = counted().filter(e => e.blockId === blockId);
+  const pool = c.filter(e => wdOf(e.date) === wd);
+  const use = pool.length ? pool : c;
+  if (!use.length) return b.start;
+  const m = {}; use.forEach(e => m[e.start] = (m[e.start]||0) + 1);
+  return Object.entries(m).sort((a,b2) => b2[1]-a[1] || a[0].localeCompare(b2[0]))[0][0];
+}
+function suggestions(wd){
+  const m = {};
+  counted().filter(e => wdOf(e.date) === wd).forEach(e => m[e.blockId] = (m[e.blockId]||0) + 1);
+  return Object.entries(m).map(([id,n]) => ({block:S.blocks.find(b => b.id === id), n, time:learnedTime(id,wd)}))
+    .filter(s => s.block && !s.block.archived).sort((a,b) => b.n - a.n);
+}
+
+/* ---------- UI-Helfer ---------- */
+let toastT;
+function toast(msg, ms=3200){ const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms); }
+let quickId = null;
+function openSheet(html){ quickId = null; $('#sheet').innerHTML = html; $('#sheetBg').classList.remove('hidden'); }
+function closeSheet(){ $('#sheetBg').classList.add('hidden'); }
+const sheetOpen = () => !$('#sheetBg').classList.contains('hidden');
+
+/* ---------- Rendering ---------- */
+function render(){ if (page === 'home') renderHome(); else renderWeek(); }
+function renderWeek(){
+  const mon = view.mon, sun = addDays(mon,6), wk = isoWeek(mon), td = todayStr();
+  const nPend = S.entries.filter(e => e.date < td && e.done === null && blockOf(e)).length;
+  let h = `<div class="top"><button data-act="prev">‹</button><div class="ttl"><b>${t('wk')} ${wk.w}</b><span>${fmtDM(mon)} – ${fmtDMY(sun)}</span></div><button data-act="next">›</button></div>`;
+  if (nPend) h += `<button class="pill" data-act="pending">${t('confirmN', nPend)}</button>`;
+  h += `<div class="days">`;
+  for (let i=0;i<7;i++){
+    const d = addDays(mon,i), ds = ymd(d);
+    const ents = S.entries.filter(e => e.date === ds && blockOf(e)).sort((a,b) => (a.start||'').localeCompare(b.start||''));
+    const chips = ents.map(e => {
+      const b = blockOf(e), Lk = look(e);
+      const st = e.done === true ? '<i class="ok">✓</i>' : e.done === false ? '<i class="no">✗</i>' : (ds < td ? '<i class="open">●</i>' : '');
+      const tm = b.sync ? `<span class="tm" data-act="time" data-id="${e.id}">${esc(e.start)}</span>` : '';
+      const lc = Lk.loc ? `<span class="lc">${esc(Lk.loc)}</span>` : '';
+      return `<div class="chip2" style="--c:${esc(Lk.color)}" data-id="${e.id}"><b>${esc(Lk.name)}</b><div class="meta">${tm}${lc}</div>${st}</div>`;
+    }).join('');
+    h += `<section class="day ${ds===td?'today':''}" data-date="${ds}"><div class="dl"><b>${dn(i)}</b><small>${fmtDM(d)}</small></div><div class="chips">${chips || `<div class="free">${t('free')}</div>`}</div><button class="add" data-act="add" data-date="${ds}">+</button></section>`;
+  }
+  h += `</div><div class="bar"><button class="ic" data-act="home" aria-label="Home">⌂</button><button data-act="thisweek">${t('today')}</button><button data-act="stats">${t('stats')}</button><button data-act="blocks">${t('blocks')}</button><button class="ic" data-act="settings" aria-label="Settings">⚙︎</button></div>`;
+  $('#app').innerHTML = h;
+}
+function nextEntry(){
+  const now = Date.now(); let best = null, bt = Infinity;
+  for (const e of S.entries){
+    const b = blockOf(e); if (!b || !b.sync || e.done === false) continue;
+    const [s,en] = span(e); if (en.getTime() <= now) continue;
+    if (s.getTime() < bt){ bt = s.getTime(); best = e; }
+  }
+  return best;
+}
+function untilText(e){
+  const [s,en] = span(e), now = new Date();
+  if (s <= now && now < en) return t('running');
+  const mins = Math.round((s - now)/60000);
+  if (mins < 60) return t('inMin', mins);
+  if (mins < 24*60) return t('inHM', Math.floor(mins/60), mins%60);
+  return t('inDays', Math.round((parse(e.date) - parse(todayStr()))/864e5));
+}
+const doneIn = (from,to) => S.entries.filter(e => e.date >= from && e.date <= to && e.done === true && blockOf(e) && blockOf(e).sync).length;
+function renderHome(){
+  const now = new Date(), td = todayStr(), mon = mondayOf(now), from = ymd(mon), to = ymd(addDays(mon,6));
+  const wkE = S.entries.filter(e => e.date >= from && e.date <= to && blockOf(e) && blockOf(e).sync);
+  const plan = wkE.length, done = wkE.filter(e => e.done === true).length;
+  const all = S.entries.filter(e => e.done === true && blockOf(e) && blockOf(e).sync);
+  const cnt = {}; all.forEach(e => cnt[e.blockId] = (cnt[e.blockId]||0) + 1);
+  const topId = Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a])[0], top = topId && S.blocks.find(b => b.id === topId);
+  const weeks = [5,4,3,2,1,0].map(i => { const m = addDays(mon,-7*i); return {w:isoWeek(m).w, n:doneIn(ymd(m), ymd(addDays(m,6))), cur:i===0}; });
+  const mx = Math.max(1, ...weeks.map(x => x.n));
+  const ne = nextEntry();
+  let card;
+  if (ne){
+    const Lk = look(ne), dd = Math.round((parse(ne.date) - parse(td))/864e5);
+    const day = dd === 0 ? t('today') : dd === 1 ? t('tomorrow') : `${dn(wdOf(ne.date))} ${fmtDM(parse(ne.date))}`;
+    card = `<div class="next" style="--c:${esc(Lk.color)}" data-act="gonext" data-id="${ne.id}"><span class="lbl">${t('next')}</span><span class="nm">${esc(Lk.name)}</span><div class="meta"><span class="t">${esc(ne.start)}</span>${Lk.loc?`<span class="lc">${esc(Lk.loc)}</span>`:''}</div><div class="when"><span>${day}</span><em>${untilText(ne)}</em></div></div>`;
+  } else {
+    card = `<div class="next none" data-act="week"><span class="lbl">${t('next')}</span><span class="nm">${t('none')}</span><div class="when"><span>${t('noneHint')}</span></div></div>`;
+  }
+  const dateLine = L() === 'de' ? `${T.de.dayfull[(now.getDay()+6)%7]} · ${fmtDMY(now)}` : `${T.en.dayfull[(now.getDay()+6)%7]} · ${fmtDMY(now)}`;
+  $('#app').innerHTML = `<div class="top"><div style="width:42px"></div><div class="ttl"><b>${t('athlete')}</b><span>${dateLine}</span></div><button class="ic" data-act="settings" aria-label="Settings" style="width:42px;height:42px;font-size:16px">⚙︎</button></div>
+    <div class="home">${card}
+      <div class="tiles">
+        <div class="tile"><small>${t('thisWeek')}</small><b>${done}/${plan}</b><div class="prog"><i style="width:${plan?Math.round(done/plan*100):0}%"></i></div></div>
+        <div class="tile"><small>${t('total')}</small><b>${all.length}</b></div>
+        <div class="tile"><small>${t('most')}</small><b class="sm">${top?esc(top.name):'–'}</b></div>
+      </div>
+      <div class="panel"><small>${t('perWeek')}</small><div class="bars">${weeks.map(x => `<div class="bc ${x.cur?'cur':''}"><span class="v">${x.n}</span><div class="b" style="height:${Math.round(x.n/mx*100)}%"></div><span class="k">${t('wk')} ${x.w}</span></div>`).join('')}</div></div>
+    </div>
+    <button class="primary big-btn" data-act="week">${t('openWeek')}</button>`;
+}
+
+/* ---------- Sheets ---------- */
+function blockBtn(b, ds, info){
+  return `<button class="bb" style="--c:${esc(b.color)}" data-act="addblock" data-id="${b.id}" data-date="${ds}"><b>${esc(b.name)}</b>${b.loc?`<small style="margin-left:6px">${esc(b.loc)}</small>`:''}<small>${esc(info||'')}</small></button>`;
+}
+function openAdd(ds){
+  const wd = wdOf(ds), sug = suggestions(wd).slice(0,3);
+  let h = `<h3>${t('addTitle', `${dn(wd)} ${fmtDM(parse(ds))}`)}</h3>`;
+  if (sug.length) h += `<h4>${t('suggestions')}</h4>` + sug.map(s => blockBtn(s.block, ds, t('sugInfo', s.n, dn(wd), s.time))).join('');
+  h += `<h4>${t('allBlocks')}</h4>` + S.blocks.filter(b => !b.archived).map(b => blockBtn(b, ds, b.sync ? `${b.start} · ${b.dur} ${t('min')}` : '')).join('');
+  h += `<div class="btnrow"><button data-act="close">${t('cancel')}</button></div>`;
+  openSheet(h);
+}
+function openEdit(id){
+  const e = entryById(id); if (!e) return;
+  const Lk = look(e), mon = view.mon;
+  const dayBtns = T[L()].days.map((n,i) => { const ds = ymd(addDays(mon,i)); return `<button data-act="moveto" data-id="${id}" data-date="${ds}" class="${ds===e.date?'on':''}">${n}</button>`; }).join('');
+  const sel = S.blocks.filter(x => !x.archived || x.id === e.blockId).map(x => `<option value="${x.id}" ${x.id===e.blockId?'selected':''}>${esc(x.name)}${x.loc?' · '+esc(x.loc):''}</option>`).join('');
+  openSheet(`<h3>${esc(Lk.name)}</h3>
+    <label>${t('template')}</label><select data-f="block" data-id="${id}">${sel}</select>
+    <label>${t('wtype')}</label><input type="text" data-f="name" data-id="${id}" value="${esc(Lk.name)}">
+    <label>${t('loc')}</label><input type="text" data-f="loc" data-id="${id}" value="${esc(Lk.loc)}" placeholder="${t('noLoc')}">
+    <div class="grid"><div><label>${t('start')}</label><input type="time" data-f="start" data-id="${id}" value="${esc(e.start)}"></div><div><label>${t('durMin')}</label><input type="number" min="0" step="5" data-f="dur" data-id="${id}" value="${e.dur}"></div></div>
+    <label>${t('color')}</label><input type="color" data-f="color" data-id="${id}" value="${esc(Lk.color)}">
+    <label>${t('day')}</label><div class="days7">${dayBtns}</div>
+    <label>${t('status')}</label><div class="seg">
+      <button data-act="status" data-id="${id}" data-v="null" class="${e.done===null?'on':''}">${t('open')}</button>
+      <button data-act="status" data-id="${id}" data-v="true" class="${e.done===true?'on':''}">${t('done')}</button>
+      <button data-act="status" data-id="${id}" data-v="false" class="${e.done===false?'on':''}">${t('notDone')}</button></div>
+    <p class="hint">${t('learnHint')}</p>
+    <p class="hint">${t('overrideHint')}</p>
+    <div class="btnrow"><button data-act="savelook" data-id="${id}">${t('saveAsBlock')}</button><button data-act="resetlook" data-id="${id}">${t('resetBlock')}</button></div>
+    <div class="btnrow" style="margin-top:8px"><button class="danger" data-act="del" data-id="${id}">${t('del')}</button><button data-act="close">${t('close')}</button></div>`);
+}
+const fmtMin = m => `${pad(Math.floor(m/60))}:${pad(m%60)}`;
+const toMin = s => { const [h,m] = s.split(':').map(Number); return h*60 + m; };
+function openTime(id){
+  const e = entryById(id); if (!e) return;
+  const Lk = look(e);
+  openSheet(`<h3>${esc(Lk.name)}</h3><p class="hint">${dn(wdOf(e.date))} ${fmtDM(parse(e.date))}${Lk.loc?' · '+esc(Lk.loc):''}</p>
+    <h4>${t('start')}</h4><div class="big">${esc(e.start)}</div>
+    <div class="step"><button data-act="tadj" data-id="${id}" data-f="start" data-d="-60">${t('m1h')}</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="-15">−15</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="15">+15</button><button data-act="tadj" data-id="${id}" data-f="start" data-d="60">${t('p1h')}</button></div>
+    <label>${t('exact')}</label><input type="time" data-f="start" data-id="${id}" value="${esc(e.start)}">
+    <h4>${t('durTitle', e.dur)}</h4>
+    <div class="step"><button data-act="tadj" data-id="${id}" data-f="dur" data-d="-30">−30</button><button data-act="tadj" data-id="${id}" data-f="dur" data-d="-15">−15</button><button data-act="tadj" data-id="${id}" data-f="dur" data-d="15">+15</button><button data-act="tadj" data-id="${id}" data-f="dur" data-d="30">+30</button></div>
+    <div class="btnrow"><button class="primary" data-act="close">${t('ok')}</button></div>`);
+  quickId = id;
+}
+function openPending(){
+  const td = todayStr();
+  const list = S.entries.filter(e => e.date < td && e.done === null && blockOf(e)).sort((a,b) => a.date.localeCompare(b.date));
+  if (!list.length) return closeSheet();
+  openSheet(`<h3>${t('pendTitle')}</h3><p class="hint">${t('pendHint')}</p>` + list.map(e => { const Lk = look(e); return `<div class="pend"><div class="n"><b>${esc(Lk.name)}</b><small>${dn(wdOf(e.date))} ${fmtDM(parse(e.date))}${Lk.loc?' · '+esc(Lk.loc):''}</small></div><button data-act="status" data-from="pend" data-id="${e.id}" data-v="true">✓</button><button data-act="status" data-from="pend" data-id="${e.id}" data-v="false">✗</button></div>`; }).join('') + `<div class="btnrow"><button data-act="close">${t('close')}</button></div>`);
+}
+function openStats(){
+  const c = counted();
+  const rows = S.blocks.map(b => {
+    const cnt = Array(7).fill(0); c.filter(e => e.blockId === b.id).forEach(e => cnt[wdOf(e.date)]++);
+    const tot = cnt.reduce((a,x) => a+x, 0); if (!tot) return '';
+    return `<tr><td style="font-weight:700"><span class="dot" style="background:${esc(b.color)}"></span>${esc(b.name)}</td>${cnt.map(n => n?`<td>${n}</td>`:'<td class="z">·</td>').join('')}<td><b>${tot}</b></td></tr>`;
+  }).join('');
+  openSheet(`<h3>${t('statsTitle')}</h3><p class="hint">${t('statsHint', c.length)}</p>` +
+    (rows ? `<table><tr><th></th>${T[L()].days.map(d => `<th>${d}</th>`).join('')}<th>Σ</th></tr>${rows}</table>` : `<p class="hint">${t('statsEmpty')}</p>`) +
+    `<div class="btnrow"><button data-act="close">${t('close')}</button></div>`);
+}
+function openBlocks(){
+  openSheet(`<h3>${t('blocksTitle')}</h3>` + S.blocks.map(b => `<button class="bb" style="--c:${esc(b.color)};${b.archived?'opacity:.45':''}" data-act="editblock" data-id="${b.id}"><b>${esc(b.name)}</b>${b.loc?`<small style="margin-left:6px">${esc(b.loc)}</small>`:''}<small>${b.archived?t('archived'):(b.sync?b.start+' · '+b.dur+' '+t('min'):t('noTime'))}</small></button>`).join('') +
+    `<div class="btnrow"><button data-act="close">${t('close')}</button><button class="primary" data-act="newblock">${t('newBlock')}</button></div>`);
+}
+function openBlockEdit(id){
+  const b = id === 'new' ? {id:'new', name:'', loc:'', color:'#ff5a4a', start:'18:00', dur:60, sync:true} : S.blocks.find(x => x.id === id);
+  openSheet(`<h3>${id==='new'?t('newBlockTitle'):t('editBlockTitle')}</h3>
+    <label>${t('name')}</label><input type="text" id="be-name" value="${esc(b.name)}" placeholder="${t('namePh')}">
+    <label>${t('loc')}</label><input type="text" id="be-loc" value="${esc(b.loc)}" placeholder="${t('locPh')}">
+    <div class="grid"><div><label>${t('defStart')}</label><input type="time" id="be-start" value="${esc(b.start)}"></div><div><label>${t('durMin')}</label><input type="number" id="be-dur" min="0" step="5" value="${b.dur}"></div></div>
+    <label>${t('color')}</label><input type="color" id="be-color" value="${esc(b.color)}">
+    <label><input type="checkbox" id="be-sync" ${b.sync?'checked':''}> ${t('hasTime')}</label>
+    <div class="btnrow">${id==='new'?'':`<button class="danger" data-act="archive" data-id="${id}">${b.archived?t('restore'):t('archive')}</button>`}<button class="primary" data-act="saveblock" data-id="${id}">${t('save')}</button></div>`);
+}
+function openSettings(){
+  const cur = L();
+  openSheet(`<h3>${t('settingsTitle')}</h3>
+    <h4>${t('language')}</h4>
+    <div class="seg2"><button data-act="lang" data-v="de" class="${cur==='de'?'on':''}">Deutsch</button><button data-act="lang" data-v="en" class="${cur==='en'?'on':''}">English</button></div>
+    <h4>${t('exportH')}</h4>
+    <div class="btnrow" style="margin-top:0"><button data-act="ics">${t('icsBtn')}</button></div>
+    <h4>${t('backupH')}</h4>
+    <div class="btnrow" style="margin-top:0"><button data-act="export">${t('backupBtn')}</button><button data-act="import">${t('restoreBtn')}</button></div>
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none" data-f="import">
+    <p class="hint">${t('backupHint')}</p>
+    <h4>${t('infoTitle')}</h4>
+    <button class="lb" data-act="info">${t('infoBtn')} ›</button>
+    <p class="copy">${t('version')} ${VERSION}</p>
+    <div class="btnrow"><button data-act="close">${t('close')}</button></div>`);
+}
+function openInfo(){
+  openSheet(`<h3>${t('infoTitle')}</h3><p class="hint">Workout · ${t('version')} ${VERSION} · ${RELEASED}</p>
+    <button class="lb" data-act="doc" data-k="guide">${t('guide')} ›</button>
+    <button class="lb" data-act="doc" data-k="changelog">${t('changelog')} ›</button>
+    <button class="lb" data-act="doc" data-k="privacy">${t('privacy')} ›</button>
+    <button class="lb" data-act="doc" data-k="terms">${t('terms')} ›</button>
+    <button class="lb" data-act="doc" data-k="contact">${t('contact')} ›</button>
+    <p class="copy">© ${YEAR} ${AUTHOR}. ${t('rights')}</p>
+    <div class="btnrow"><button data-act="settings">${t('back')}</button><button data-act="close">${t('close')}</button></div>`);
+}
+function openDoc(k, first){
+  const sec = list => list.map(([h2,p]) => `<h4>${esc(h2)}</h4><p>${esc(p)}</p>`).join('');
+  let title, body;
+  if (k === 'guide'){
+    title = t('guide');
+    body = T[L()].guideItems.map(([a,b], i) => `<div class="gi"><b>${i+1}. ${esc(a)}</b><p>${esc(b)}</p></div>`).join('');
+    S.settings.guideSeen = true; save();
+  } else if (k === 'changelog'){
+    title = t('changelog');
+    body = T[L()].changes.map(([v,d,items]) => `<h4>v${v} · ${d}</h4><ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('');
+  } else if (k === 'privacy'){ title = t('privacy'); body = sec(T[L()].privacyDoc); }
+  else if (k === 'terms'){ title = t('terms'); body = sec(T[L()].termsDoc); }
+  else {
+    title = t('contact');
+    body = `<h4>${t('contactLbl')}</h4><p>${esc(AUTHOR)}<br><a href="mailto:${CONTACT}">${CONTACT}</a></p><h4>Copyright</h4><p>© ${YEAR} ${esc(AUTHOR)}. ${t('rights')}</p><h4>${t('version')}</h4><p>${VERSION} · ${RELEASED}</p>`;
+  }
+  openSheet(`<div class="doc"><h3>${esc(title)}</h3>${body}</div>` + (first
+    ? `<div class="btnrow"><button class="primary" data-act="close">${t('letsgo')}</button></div>`
+    : `<div class="btnrow"><button data-act="info">${t('back')}</button><button data-act="close">${t('close')}</button></div>`));
+}
+
+/* ---------- Aktionen ---------- */
+document.addEventListener('click', ev => {
+  if (ev.target.id === 'sheetBg') return closeSheet();
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  ev.stopPropagation();
+  const a = el.dataset.act, id = el.dataset.id, e = id ? entryById(id) : null;
+  switch (a){
+    case 'prev': view.mon = addDays(view.mon,-7); render(); break;
+    case 'next': view.mon = addDays(view.mon,7); render(); break;
+    case 'thisweek': view.mon = mondayOf(new Date()); render(); break;
+    case 'home': page = 'home'; render(); break;
+    case 'week': page = 'week'; view.mon = mondayOf(new Date()); render(); break;
+    case 'gonext': if (e){ page = 'week'; view.mon = mondayOf(parse(e.date)); render(); } break;
+    case 'close': closeSheet(); break;
+    case 'add': openAdd(el.dataset.date); break;
+    case 'addblock': {
+      const b = S.blocks.find(x => x.id === id), ds = el.dataset.date;
+      S.entries.push({id:uid(), blockId:id, date:ds, start:learnedTime(id, wdOf(ds)), dur:b.dur, done:null});
+      save(); closeSheet(); render(); break; }
+    case 'edit': openEdit(id); break;
+    case 'time': openTime(id); break;
+    case 'tadj': if (e){
+      if (el.dataset.f === 'start') e.start = fmtMin(Math.min(1425, Math.max(0, toMin(e.start) + (+el.dataset.d))));
+      else e.dur = Math.min(600, Math.max(15, (e.dur || 0) + (+el.dataset.d)));
+      save(); render(); openTime(id); } break;
+    case 'resetlook': if (e){ delete e.name; delete e.loc; delete e.color; save(); render(); openEdit(id); } break;
+    case 'savelook': if (e){ const b = blockOf(e), Lk = look(e), nb = {id:'b_' + uid(), name:Lk.name, loc:Lk.loc, color:Lk.color, start:e.start, dur:e.dur, sync:b.sync};
+      S.blocks.push(nb); e.blockId = nb.id; delete e.name; delete e.loc; delete e.color; save(); render(); openEdit(id); toast(t('newBlockSaved')); } break;
+    case 'moveto': if (e){ e.date = el.dataset.date; save(); render(); openEdit(id); } break;
+    case 'status': if (e){ e.done = el.dataset.v === 'null' ? null : el.dataset.v === 'true'; save(); render(); if (el.dataset.from === 'pend') openPending(); else if (sheetOpen()) openEdit(id); } break;
+    case 'pending': openPending(); break;
+    case 'del': if (e && confirm(t('confirmDel'))){ S.entries = S.entries.filter(x => x.id !== id); save(); closeSheet(); render(); } break;
+    case 'stats': openStats(); break;
+    case 'blocks': openBlocks(); break;
+    case 'newblock': openBlockEdit('new'); break;
+    case 'editblock': openBlockEdit(id); break;
+    case 'archive': { const b = S.blocks.find(x => x.id === id); b.archived = !b.archived; save(); openBlocks(); render(); break; }
+    case 'saveblock': saveBlock(id); break;
+    case 'settings': openSettings(); break;
+    case 'lang': S.settings.lang = el.dataset.v; save(); applySplash(); render(); openSettings(); break;
+    case 'info': openInfo(); break;
+    case 'doc': openDoc(el.dataset.k); break;
+    case 'export': download(`workout-backup-${todayStr()}.json`, JSON.stringify(S,null,1), 'application/json'); break;
+    case 'import': $('#importFile').click(); break;
+    case 'ics': exportIcs(); break;
+  }
+});
+document.addEventListener('change', ev => {
+  const f = ev.target.dataset && ev.target.dataset.f; if (!f) return;
+  const e = ev.target.dataset.id ? entryById(ev.target.dataset.id) : null;
+  if (f === 'start' && e){ e.start = ev.target.value || e.start; save(); render(); if (quickId === e.id) openTime(e.id); }
+  else if (f === 'dur' && e){ e.dur = Math.max(0, parseInt(ev.target.value,10) || 0); save(); render(); if (quickId === e.id) openTime(e.id); }
+  else if (f === 'block' && e){ const b = S.blocks.find(x => x.id === ev.target.value); delete e.name; delete e.loc; delete e.color; e.blockId = b.id; e.start = learnedTime(b.id, wdOf(e.date)); e.dur = b.dur; save(); render(); openEdit(e.id); }
+  else if ((f === 'name' || f === 'loc' || f === 'color') && e){
+    const b = blockOf(e), v = ev.target.value.trim();
+    if (f === 'name'){ if (!v || v === b.name) delete e.name; else e.name = v; }
+    else if (f === 'loc'){ if (v === b.loc) delete e.loc; else e.loc = v; }
+    else { if (v.toLowerCase() === b.color.toLowerCase()) delete e.color; else e.color = v; }
+    save(); render();
+  }
+  else if (f === 'import'){
+    const file = ev.target.files[0]; if (!file) return;
+    file.text().then(tx => { const j = JSON.parse(tx); if (!Array.isArray(j.blocks) || !Array.isArray(j.entries)) throw new Error(t('invalidFile')); S = j; S.settings = S.settings || {}; delete S.settings.clientId; delete S.settings.calendarId; save(); closeSheet(); applySplash(); render(); toast(t('restored')); }).catch(err => toast(t('importFail') + err.message));
+  }
+});
+function saveBlock(id){
+  const name = $('#be-name').value.trim(); if (!name) return toast(t('needName'));
+  const data = {name, loc:$('#be-loc').value.trim(), color:$('#be-color').value, start:$('#be-start').value || '18:00', dur:Math.max(0, parseInt($('#be-dur').value,10) || 0), sync:$('#be-sync').checked};
+  if (id === 'new') S.blocks.push(Object.assign({id:'b_' + uid()}, data));
+  else Object.assign(S.blocks.find(b => b.id === id), data);
+  save(); openBlocks(); render();
+}
+function download(name, text, type){
+  const blob = new Blob([text], {type}), file = new File([blob], name, {type});
+  if (navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(() => {}); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- Kalender-Export (.ics, ohne Sync) ---------- */
+const weekEntries = mon => { const from = ymd(mon), to = ymd(addDays(mon,6)); return S.entries.filter(e => e.date >= from && e.date <= to && blockOf(e) && blockOf(e).sync); };
+function span(e){ const [h,m] = e.start.split(':').map(Number); const s = parse(e.date); s.setHours(h,m,0,0); const en = new Date(s.getTime() + (e.dur||60)*60000); return [s,en]; }
+const localIso = d => `${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+function exportIcs(){
+  const wk = isoWeek(view.mon), list = weekEntries(view.mon);
+  if (!list.length) return toast(t('noEvents'));
+  const stamp = new Date().toISOString().replace(/[-:]|\.\d{3}/g,'');
+  const fl = d => localIso(d).replace(/[-:]/g,'');
+  const tx = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
+  const Ls = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Workout//DE','CALSCALE:GREGORIAN'];
+  list.forEach(e => { const Lk = look(e), [s,en] = span(e);
+    Ls.push('BEGIN:VEVENT',`UID:${e.id}@workout`,`DTSTAMP:${stamp}`,`DTSTART:${fl(s)}`,`DTEND:${fl(en)}`,`SUMMARY:${tx(Lk.name)}`,...(Lk.loc?[`LOCATION:${tx(Lk.loc)}`]:[]),'END:VEVENT'); });
+  Ls.push('END:VCALENDAR');
+  download(`workouts-${wk.key}.ics`, Ls.join('\r\n'), 'text/calendar');
+}
+
+/* ---------- Verschieben per Finger ---------- */
+(function(){
+  let d = null;
+  const app = $('#app');
+  app.addEventListener('pointerdown', ev => {
+    const c = ev.target.closest('.chip2'); if (!c || ev.button > 0 || ev.target.closest('.tm')) return;
+    d = {id:c.dataset.id, el:c, x:ev.clientX, y:ev.clientY, moving:false, ghost:null, over:null, pid:ev.pointerId};
+    try { c.setPointerCapture(ev.pointerId); } catch(e){}
+  });
+  app.addEventListener('pointermove', ev => {
+    if (!d || ev.pointerId !== d.pid) return;
+    if (!d.moving){
+      if (Math.hypot(ev.clientX - d.x, ev.clientY - d.y) < 8) return;
+      d.moving = true;
+      const r = d.el.getBoundingClientRect(), g = d.el.cloneNode(true);
+      g.classList.add('ghost'); g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+      document.body.appendChild(g); d.ghost = g; d.dx = ev.clientX - r.left; d.dy = ev.clientY - r.top;
+      d.el.classList.add('lift');
+      if (navigator.vibrate) navigator.vibrate(10);
+    }
+    d.ghost.style.left = (ev.clientX - d.dx) + 'px'; d.ghost.style.top = (ev.clientY - d.dy) + 'px';
+    const el2 = document.elementFromPoint(ev.clientX, ev.clientY), row = el2 && el2.closest ? el2.closest('.day') : null;
+    if (row !== d.over){ if (d.over) d.over.classList.remove('drop'); d.over = row; if (row) row.classList.add('drop'); }
+  });
+  const end = ev => {
+    if (!d || ev.pointerId !== d.pid) return;
+    const s = d; d = null;
+    if (s.ghost) s.ghost.remove();
+    if (s.over) s.over.classList.remove('drop');
+    if (s.moving){
+      const nd = s.over && s.over.dataset.date, e = entryById(s.id);
+      if (e && nd && e.date !== nd){ e.date = nd; save(); }
+      render();
+    } else if (ev.type === 'pointerup') openEdit(s.id);
+  };
+  app.addEventListener('pointerup', end);
+  app.addEventListener('pointercancel', end);
+})();
+
+/* ---------- Start ---------- */
+// iOS-Homescreen-Apps: Das Layout-Viewport ist mit viewport-fit=cover oft um die Statusleiste zu kurz.
+// Dann sorgt die volle Bildschirmhöhe dafür, dass Hintergrund und Leiste ganz nach unten reichen.
+function fixHeight(){
+  const sa = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  const gap = window.screen.height - window.innerHeight;
+  if (sa && gap > 0 && gap < 90) document.documentElement.style.setProperty('--H', window.screen.height + 'px');
+  else document.documentElement.style.removeProperty('--H');
+}
+fixHeight(); addEventListener('resize', fixHeight); addEventListener('orientationchange', fixHeight);
+applySplash();
+(function(){
+  const sp = $('#splash'); if (!sp) return;
+  let gone = false;
+  const hide = () => {
+    if (gone) return; gone = true; sp.classList.add('out'); setTimeout(() => sp.remove(), 700);
+    setTimeout(() => {
+      if (!S.settings.guideSeen) openDoc('guide', true);
+      else if (S.settings.seenVersion !== VERSION) openDoc('changelog');
+      S.settings.seenVersion = VERSION; save();
+    }, 750);
+  };
+  setTimeout(hide, 2600); sp.addEventListener('click', hide);
+})();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && page === 'home') render(); });
+render();
+if ('serviceWorker' in navigator){
+  const had = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) toast(t('updated'), 6000); });
+}
+
+</script>
+</body>
+</html>
