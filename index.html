@@ -76,7 +76,7 @@ button:active{opacity:.7}
 .bb{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin-bottom:6px;border-radius:16px!important;border-left:8px solid var(--c)!important}
 .bb small{color:#6b6478;margin-left:auto;font-size:12px}
 label{display:block;margin:12px 0 4px;color:#6b6478;font-size:12px;font-weight:700;letter-spacing:.06em}
-input[type=text],input[type=time],input[type=number],select{width:100%;background:#fff;color:var(--ink);border:1px solid #d9d1c5;border-radius:12px;padding:10px;font-size:16px}
+input[type=text],input[type=email],input[type=password],input[type=time],input[type=number],select{width:100%;background:#fff;color:var(--ink);border:1px solid #d9d1c5;border-radius:12px;padding:10px;font-size:16px}
 input[type=color]{width:100%;height:42px;background:#fff;border:1px solid #d9d1c5;border-radius:12px;padding:3px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 4px;font-size:14px}
@@ -138,6 +138,26 @@ a{color:var(--uv);font-weight:700}
 .gi b{display:block;font:italic 800 16px/1.2 var(--disp);margin-bottom:3px}.gi p{margin:0;font-size:14px;line-height:1.45;color:#3b3552}
 .seg2{display:flex;gap:6px}.seg2 button{flex:1;padding:10px 4px}
 .copy{margin-top:14px;font-size:13px;color:#6b6478}
+
+.bar{grid-template-columns:auto 1fr 1fr 1.3fr 1fr auto}
+.bar button{padding:12px 5px;font-size:9.5px;letter-spacing:.03em}
+.bar button:disabled{opacity:.38}
+.next{max-height:210px;min-height:120px}
+.panel{min-height:90px}
+.cp{flex:none!important;max-height:none!important;min-height:0;cursor:pointer;padding-bottom:8px}
+.cp .r{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:3px 0;border-top:1px solid var(--line);margin-top:3px}
+.cp .r:first-of-type{margin-top:6px}
+.cp .r .d{white-space:nowrap;border-left:3px solid var(--c);padding-left:7px}
+.cp .r span:last-child{color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bb{min-width:0}.bb b{flex:0 1 auto;min-width:0}.bb .lc{margin-left:6px;margin-right:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1 1 0}
+.lb:disabled{width:100%}
+.chatlist{max-height:42vh;overflow:auto;margin:10px 0;display:flex;flex-direction:column;gap:6px}
+.msg{background:#fff;border:1px solid #d9d1c5;border-radius:14px;padding:7px 11px;max-width:88%;align-self:flex-start}
+.msg.me{align-self:flex-end;background:#e6e1ff;border-color:#cfc7ff}
+.msg .mh{display:flex;align-items:center;gap:8px;font-size:12px}
+.msg .mh small{color:#6b6478}.msg .mh i{margin-left:auto;font-style:normal;color:#d93a2b;font-weight:800;padding:0 4px;cursor:pointer}
+.msg p{margin:2px 0 0;font-size:15px;white-space:pre-wrap;word-break:break-word}
+.chatrow{display:flex;gap:8px;margin-top:6px}.chatrow input{flex:1;min-width:0}.chatrow button{flex:none;padding:0 18px}
 </style>
 </head>
 <body>
@@ -149,7 +169,7 @@ a{color:var(--uv);font-weight:700}
 <script>
 'use strict';
 /* ---------- App-Infos ---------- */
-const VERSION = '1.2.0', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
+const VERSION = '1.3.0', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
 
 /* ---------- Helfer ---------- */
 const $ = s => document.querySelector(s);
@@ -212,6 +232,7 @@ const T = {
  de: {
   sp2:'ATHLET', sp3:'Let’s train', athlete:'ATHLET',
   days:['Mo','Di','Mi','Do','Fr','Sa','So'], dayfull:['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'],
+  syncSoon:'Kalender-Sync (in Planung)', presets:'Vorgefertigt', own:'Eigene', archivedH:'Archiviert', delBlock:'Löschen', delBlockQ:n => n ? `Baustein löschen? ${n} Termin${n>1?'e':''} mit diesem Baustein werden ebenfalls entfernt. Alternativ kannst du ihn archivieren.` : 'Baustein löschen?', blockDeleted:'Baustein gelöscht',
   wk:'KW', today:'Heute', tomorrow:'Morgen', stats:'Stats', blocks:'Bausteine', free:'Frei',
   confirmN:n => `✓ ${n} Einheit${n>1?'en':''} bestätigen`,
   next:'Nächstes Workout', none:'Noch nichts geplant', noneHint:'Plane deine Woche im Wochenplan',
@@ -245,11 +266,12 @@ const T = {
    ['Einzelnen Termin anpassen','Tippe auf den Baustein selbst. Du änderst Trainingstyp, Ort, Farbe, Zeit, Tag und Status nur für diesen Termin. „Als neuen Baustein speichern“ macht daraus eine Vorlage.'],
    ['Bausteine','Unter „Bausteine“ legst du Vorlagen an und änderst sie. Änderungen gelten für alle Termine, die du nicht einzeln angepasst hast.'],
    ['Bestätigen & Lernen','Bestätige vergangene Einheiten mit ✓. Sie füllen die Statistik, und für die Vorschläge beim + zählen sie, sobald der Tag vorbei ist.'],
-   ['Crew (optional)','Tippe auf der Startseite auf 👥. Nach der Anmeldung gründest du eine Crew oder trittst mit einem Einladungscode bei. Dein Plan wird geteilt, solange „Teilen“ an ist. In der Crew-Woche siehst du, wer wann wo trainiert.'],
+   ['Crew (optional)','Tippe auf der Startseite auf 👥. Nach der Anmeldung gründest du eine Crew oder trittst mit einem Einladungscode bei. Dein Plan wird geteilt, solange „Teilen“ an ist. Auf der Startseite siehst du die nächsten Crew-Workouts. In der Crew-Woche siehst du, wer wann wo trainiert. Mit 💬 chattest du zu einem Termin, der Crew-Chat steht im Crew-Menü.'],
    ['Startseite','Zeigt dein nächstes Workout und deine Statistik. Mit ⌂ kommst du jederzeit dorthin zurück.'],
    ['Deine Daten','Alles bleibt auf deinem Gerät. Sichere es unter ⚙︎ → Daten sichern. Öffne die App immer über das Homescreen-Symbol, denn Safari speichert getrennt.']
   ],
   changes:[
+   ['1.3.0','27.11.2026',['Chat: Crew-Chat und Chat pro Termin','Crew-Workouts auf der Startseite','Bausteine nach Häufigkeit sortiert, getrennt in Eigene und Vorgefertigte; eigene lassen sich löschen','Platzhalter für den Kalender-Sync','Mehr Zuverlässigkeit beim Layout am unteren Rand auf dem iPhone']],
    ['1.2.0','27.11.2026',['Neu: optionale Crew. Mit Konto (E-Mail oder Google) und Einladungscode teilst du deinen Wochenplan mit Freunden und siehst ihre Pläne','Konto und Crew-Daten lassen sich in der App löschen']],
    ['1.1.0','26.11.2026',['Sprache Deutsch/Englisch umschaltbar','Info-Bereich mit Anleitung, Datenschutz, Haftungsausschluss und Kontakt','Hinweis, wenn eine neue Version geladen wurde','Google-Kalender-Sync entfernt, der .ics-Export bleibt in den Einstellungen','Korrektur: Hintergrund reicht auf dem iPhone bis ganz nach unten']],
    ['1.0.0','25.11.2026',['Wochenplan mit Verschieben per Finger','Startseite mit nächstem Workout und Statistik','Uhrzeit-Schnellwahl und individuelle Anpassung pro Termin','Lernende Vorschläge aus bestätigten Einheiten']]
@@ -259,7 +281,7 @@ const T = {
    ['Kurzfassung','Ohne Crew-Funktion bleiben deine Eingaben nur lokal auf deinem Gerät: keine Konten, keine Werbung, kein Tracking. Nur wenn du die optionale Crew-Funktion nutzt, werden die unten beschriebenen Daten bei Google Firebase gespeichert.'],
    ['Lokale Speicherung','Pläne, Bausteine und Einstellungen liegen im Speicher deines Browsers bzw. der Homescreen-App (localStorage) und im Cache der App, damit sie auch offline startet. Diese Daten verlassen dein Gerät nicht. Du kannst sie über ⚙︎ → Daten sichern exportieren und durch Löschen der App bzw. der Website-Daten entfernen.'],
    ['Hosting','Die App wird über GitHub Pages ausgeliefert. Beim Aufruf verarbeitet GitHub technisch notwendige Verbindungsdaten (z. B. IP-Adresse, Zeitpunkt, Browserinformationen) in Server-Protokollen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (sicherer und effizienter Betrieb). Dabei kann eine Übermittlung in die USA stattfinden. Details findest du in den Datenschutzhinweisen von GitHub.'],
-   ['Crew-Funktion (optional)','Nur wenn du die Crew-Funktion aktivierst, lädt die App Programmbibliotheken von Google (gstatic.com) und nutzt Google Firebase (Google Ireland Ltd. / Google LLC): Firebase Authentication (E-Mail-Adresse, Passwort-Hash oder Google-Konto, Konto-ID) und Cloud Firestore (Standort EU) für Anzeigename, Crew-Zugehörigkeit und deinen geteilten Plan (Datum, Uhrzeit, Dauer, Trainingsname, Ort, Farbe). Dabei verarbeitet Google technisch bedingt auch IP-Adresse und Geräteinformationen; eine Übermittlung in die USA ist möglich. Zweck: Abstimmung des Trainings mit deiner Crew. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit mit Wirkung für die Zukunft widerrufen kannst. Trainingsdaten können Hinweise auf deine Lebensgewohnheiten geben; Gesundheitsdaten im engeren Sinne werden nicht abgefragt. Sichtbar sind deine Daten nur für Mitglieder deiner Crew (max. 20), die deinen Einladungscode kennen. Die Funktion ist erst ab 16 Jahren gedacht. Du kannst das Teilen jederzeit ausschalten, die Crew verlassen oder dein Konto samt Daten in der App löschen. Gespeichert wird, bis du löschst.'],
+   ['Crew-Funktion (optional)','Nur wenn du die Crew-Funktion aktivierst, lädt die App Programmbibliotheken von Google (gstatic.com) und nutzt Google Firebase (Google Ireland Ltd. / Google LLC): Firebase Authentication (E-Mail-Adresse, Passwort-Hash oder Google-Konto, Konto-ID) und Cloud Firestore (Standort EU) für Anzeigename, Crew-Zugehörigkeit und deinen geteilten Plan (Datum, Uhrzeit, Dauer, Trainingsname, Ort, Farbe). Dabei verarbeitet Google technisch bedingt auch IP-Adresse und Geräteinformationen; eine Übermittlung in die USA ist möglich. Zweck: Abstimmung des Trainings mit deiner Crew. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit mit Wirkung für die Zukunft widerrufen kannst. Trainingsdaten können Hinweise auf deine Lebensgewohnheiten geben; Gesundheitsdaten im engeren Sinne werden nicht abgefragt. Dazu kommen Chat-Nachrichten (Text, Anzeigename, Zeitpunkt, Zuordnung zu Crew oder Termin), falls du den Chat nutzt. Du kannst eigene Nachrichten löschen; beim Verlassen der Crew und beim Löschen des Kontos werden sie ebenfalls gelöscht. Sichtbar sind deine Daten nur für Mitglieder deiner Crew (max. 20), die deinen Einladungscode kennen. Die Funktion ist erst ab 16 Jahren gedacht. Du kannst das Teilen jederzeit ausschalten, die Crew verlassen oder dein Konto samt Daten in der App löschen. Gespeichert wird, bis du löschst.'],
    ['Sonstige Drittanbieter','Ohne Crew-Funktion lädt die App keine Schriftarten, Skripte oder Tracker von Dritten nach.'],
    ['Deine Rechte','Du kannst deine Daten direkt in der App einsehen, exportieren und löschen. Zur Ausübung deiner Rechte nach der DSGVO (Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit) schreib an die oben genannte E-Mail-Adresse. Du hast außerdem das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.'],
    ['Änderungen','Kommen weitere Funktionen wie ein Chat hinzu, wird diese Erklärung vorher angepasst. Stand: 27.11.2026.']
@@ -268,12 +290,14 @@ const T = {
    ['Privates Projekt','Diese App ist ein privates Hobbyprojekt und wird unentgeltlich zur Verfügung gestellt.'],
    ['Keine Beratung','Die App ersetzt keine ärztliche, therapeutische oder trainingswissenschaftliche Beratung. Training erfolgt auf eigene Verantwortung. Bei gesundheitlichen Beschwerden hol dir ärztlichen Rat.'],
    ['Keine Gewähr','Für Richtigkeit, Verfügbarkeit und Vollständigkeit wird keine Gewähr übernommen. Daten können verloren gehen, zum Beispiel wenn Website-Daten gelöscht werden. Sichere sie deshalb regelmäßig.'],
+   ['Crew & Chat','Für Inhalte, die du in der Crew teilst oder schreibst, bist du selbst verantwortlich. Bleib respektvoll und gib den Einladungscode nur an Personen weiter, die du kennst.'],
    ['Haftung','Die Haftung ist, soweit gesetzlich zulässig, auf Vorsatz und grobe Fahrlässigkeit beschränkt. Unberührt bleibt die Haftung für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie nach zwingenden gesetzlichen Vorschriften.']
   ]
  },
  en: {
   sp2:'ATHLETE', sp3:'Let’s train', athlete:'ATHLETE',
   days:['Mo','Tu','We','Th','Fr','Sa','Su'], dayfull:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+  syncSoon:'Calendar sync (planned)', presets:'Presets', own:'Custom', archivedH:'Archived', delBlock:'Delete', delBlockQ:n => n ? `Delete block? ${n} session${n>1?'s':''} using this block will be removed too. You can archive it instead.` : 'Delete block?', blockDeleted:'Block deleted',
   wk:'Wk', today:'Today', tomorrow:'Tomorrow', stats:'Stats', blocks:'Blocks', free:'Free',
   confirmN:n => `✓ Confirm ${n} session${n>1?'s':''}`,
   next:'Next workout', none:'Nothing planned yet', noneHint:'Plan your week in the weekly plan',
@@ -307,11 +331,12 @@ const T = {
    ['Editing a single session','Tap the block itself. You change workout type, location, color, time, day and status for this session only. “Save as new block” turns it into a template.'],
    ['Blocks','Under “Blocks” you create and edit templates. Changes apply to all sessions you have not edited individually.'],
    ['Confirming & learning','Confirm past sessions with ✓. They fill the statistics, and they count for the suggestions at + once the day is over.'],
-   ['Crew (optional)','Tap 👥 on the home screen. After signing in you create a crew or join with an invite code. Your plan is shared while “Sharing” is on. The crew week shows who trains when and where.'],
+   ['Crew (optional)','Tap 👥 on the home screen. After signing in you create a crew or join with an invite code. Your plan is shared while “Sharing” is on. The home screen shows the next crew workouts. The crew week shows who trains when and where. Use 💬 to chat about a session, the crew chat is in the crew menu.'],
    ['Home','Shows your next workout and your statistics. ⌂ takes you back there at any time.'],
    ['Your data','Everything stays on your device. Back it up under ⚙︎ → Back up data. Always open the app from the home-screen icon, because Safari stores data separately.']
   ],
   changes:[
+   ['1.3.0','27.11.2026',['Chat: crew chat and chat per session','Crew workouts on the home screen','Blocks sorted by use, split into custom and presets; custom ones can be deleted','Placeholder for calendar sync','More reliable bottom-edge layout on iPhone']],
    ['1.2.0','27.11.2026',['New: optional crew. With an account (email or Google) and an invite code you share your weekly plan with friends and see theirs','Account and crew data can be deleted in the app']],
    ['1.1.0','26.11.2026',['Switch between German and English','Info section with guide, privacy, disclaimer and contact','Notice when a new version has been loaded','Google Calendar sync removed, the .ics export stays in settings','Fix: background now reaches the bottom on iPhone']],
    ['1.0.0','25.11.2026',['Weekly plan with finger drag and drop','Home screen with next workout and statistics','Quick time picker and per-session edits','Learning suggestions from confirmed sessions']]
@@ -321,7 +346,7 @@ const T = {
    ['Summary','Without the crew feature your entries stay only on your device: no accounts, no ads, no tracking. Only if you use the optional crew feature is the data described below stored at Google Firebase.'],
    ['Local storage','Plans, blocks and settings are kept in the storage of your browser or home-screen app (localStorage) and in the app cache, so that it also starts offline. This data does not leave your device. You can export it via ⚙︎ → Back up data and remove it by deleting the app or the website data.'],
    ['Hosting','The app is served via GitHub Pages. When you open it, GitHub processes technically necessary connection data (e.g. IP address, time, browser information) in server logs. The legal basis is Art. 6(1)(f) GDPR (secure and efficient operation). A transfer to the USA may take place. See GitHub’s privacy statement for details.'],
-   ['Crew feature (optional)','Only if you enable the crew feature does the app load code libraries from Google (gstatic.com) and use Google Firebase (Google Ireland Ltd. / Google LLC): Firebase Authentication (email address, password hash or Google account, account ID) and Cloud Firestore (EU location) for display name, crew membership and your shared plan (date, time, duration, workout name, location, color). Google also technically processes IP address and device information; a transfer to the USA is possible. Purpose: coordinating training with your crew. Legal basis is your consent (Art. 6(1)(a) GDPR), which you can withdraw at any time with effect for the future. Training data can reveal information about your daily routine; health data in the narrow sense is not requested. Your data is visible only to members of your crew (max. 20) who know your invite code. The feature is intended for ages 16 and up. You can turn sharing off, leave the crew or delete your account with all data in the app at any time. Data is kept until you delete it.'],
+   ['Crew feature (optional)','Only if you enable the crew feature does the app load code libraries from Google (gstatic.com) and use Google Firebase (Google Ireland Ltd. / Google LLC): Firebase Authentication (email address, password hash or Google account, account ID) and Cloud Firestore (EU location) for display name, crew membership and your shared plan (date, time, duration, workout name, location, color). Google also technically processes IP address and device information; a transfer to the USA is possible. Purpose: coordinating training with your crew. Legal basis is your consent (Art. 6(1)(a) GDPR), which you can withdraw at any time with effect for the future. Training data can reveal information about your daily routine; health data in the narrow sense is not requested. This also includes chat messages (text, display name, time, assignment to crew or session) if you use the chat. You can delete your own messages; they are also deleted when you leave the crew and when you delete your account. Your data is visible only to members of your crew (max. 20) who know your invite code. The feature is intended for ages 16 and up. You can turn sharing off, leave the crew or delete your account with all data in the app at any time. Data is kept until you delete it.'],
    ['Other third parties','Without the crew feature the app does not load fonts, scripts or trackers from third parties.'],
    ['Your rights','You can view, export and delete your data directly in the app. To exercise your rights under the GDPR (access, rectification, erasure, restriction, objection, data portability), write to the email address above. You also have the right to lodge a complaint with a data protection authority.'],
    ['Changes','If further features such as chat are added, this notice will be updated beforehand. Last updated: 27 Nov 2026.']
@@ -330,6 +355,7 @@ const T = {
    ['Private project','This app is a private hobby project and is provided free of charge.'],
    ['No advice','The app does not replace medical, therapeutic or sports-science advice. You train at your own risk. If you have health problems, seek medical advice.'],
    ['No warranty','No warranty is given for correctness, availability or completeness. Data can be lost, for example when website data is deleted. Please back it up regularly.'],
+   ['Crew & chat','You are responsible for content you share or write in the crew. Stay respectful and only give the invite code to people you know.'],
    ['Liability','To the extent permitted by law, liability is limited to intent and gross negligence. Liability for injury to life, body or health and liability under mandatory law remain unaffected.']
   ]
  }
@@ -362,8 +388,8 @@ function suggestions(wd){
 let toastT;
 function toast(msg, ms=3200){ const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms); }
 let quickId = null;
-function openSheet(html){ quickId = null; $('#sheet').innerHTML = html; $('#sheetBg').classList.remove('hidden'); }
-function closeSheet(){ $('#sheetBg').classList.add('hidden'); }
+function openSheet(html){ if (typeof chatStop === 'function') chatStop(); quickId = null; $('#sheet').innerHTML = html; $('#sheetBg').classList.remove('hidden'); }
+function closeSheet(){ if (typeof chatStop === 'function') chatStop(); $('#sheetBg').classList.add('hidden'); }
 const sheetOpen = () => !$('#sheetBg').classList.contains('hidden');
 
 /* ---------- Rendering ---------- */
@@ -386,7 +412,7 @@ function renderWeek(){
     }).join('');
     h += `<section class="day ${ds===td?'today':''}" data-date="${ds}"><div class="dl"><b>${dn(i)}</b><small>${fmtDM(d)}</small></div><div class="chips">${chips || `<div class="free">${t('free')}</div>`}</div><button class="add" data-act="add" data-date="${ds}">+</button></section>`;
   }
-  h += `</div><div class="bar"><button class="ic" data-act="home" aria-label="Home">⌂</button><button data-act="thisweek">${t('today')}</button><button data-act="stats">${t('stats')}</button><button data-act="blocks">${t('blocks')}</button><button class="ic" data-act="settings" aria-label="Settings">⚙︎</button></div>`;
+  h += `</div><div class="bar"><button class="ic" data-act="home" aria-label="Home">⌂</button><button data-act="thisweek">${t('today')}</button><button data-act="stats">${t('stats')}</button><button data-act="blocks">${t('blocks')}</button><button disabled title="${t('syncSoon')}">Sync</button><button class="ic" data-act="settings" aria-label="Settings">⚙︎</button></div>`;
   $('#app').innerHTML = h;
 }
 function nextEntry(){
@@ -433,12 +459,16 @@ function renderHome(){
         <div class="tile"><small>${t('total')}</small><b>${all.length}</b></div>
         <div class="tile"><small>${t('most')}</small><b class="sm">${top?esc(top.name):'–'}</b></div>
       </div>
+      ${typeof crewPanel === 'function' ? crewPanel() : ''}
       <div class="panel"><small>${t('perWeek')}</small><div class="bars">${weeks.map(x => `<div class="bc ${x.cur?'cur':''}"><span class="v">${x.n}</span><div class="b" style="height:${Math.round(x.n/mx*100)}%"></div><span class="k">${t('wk')} ${x.w}</span></div>`).join('')}</div></div>
     </div>
     <button class="primary big-btn" data-act="week">${t('openWeek')}</button>`;
 }
 
 /* ---------- Sheets ---------- */
+const PRESET = ['squat','dead','jerk','gren','cfm','oly','pil','run','yoga','rest'];
+const usage = () => { const u = {}; S.entries.forEach(e => u[e.blockId] = (u[e.blockId]||0) + 1); return u; };
+const byUse = u => (a,b) => (u[b.id]||0) - (u[a.id]||0) || a.name.localeCompare(b.name);
 function blockBtn(b, ds, info){
   return `<button class="bb" style="--c:${esc(b.color)}" data-act="addblock" data-id="${b.id}" data-date="${ds}"><b>${esc(b.name)}</b>${b.loc?`<small style="margin-left:6px">${esc(b.loc)}</small>`:''}<small>${esc(info||'')}</small></button>`;
 }
@@ -446,7 +476,7 @@ function openAdd(ds){
   const wd = wdOf(ds), sug = suggestions(wd).slice(0,3);
   let h = `<h3>${t('addTitle', `${dn(wd)} ${fmtDM(parse(ds))}`)}</h3>`;
   if (sug.length) h += `<h4>${t('suggestions')}</h4>` + sug.map(s => blockBtn(s.block, ds, t('sugInfo', s.n, dn(wd), s.time))).join('');
-  h += `<h4>${t('allBlocks')}</h4>` + S.blocks.filter(b => !b.archived).map(b => blockBtn(b, ds, b.sync ? `${b.start} · ${b.dur} ${t('min')}` : '')).join('');
+  h += `<h4>${t('allBlocks')}</h4>` + S.blocks.filter(b => !b.archived).sort(byUse(usage())).map(b => blockBtn(b, ds, b.sync ? `${b.start} · ${b.dur} ${t('min')}` : '')).join('');
   h += `<div class="btnrow"><button data-act="close">${t('cancel')}</button></div>`;
   openSheet(h);
 }
@@ -503,7 +533,13 @@ function openStats(){
     `<div class="btnrow"><button data-act="close">${t('close')}</button></div>`);
 }
 function openBlocks(){
-  openSheet(`<h3>${t('blocksTitle')}</h3>` + S.blocks.map(b => `<button class="bb" style="--c:${esc(b.color)};${b.archived?'opacity:.45':''}" data-act="editblock" data-id="${b.id}"><b>${esc(b.name)}</b>${b.loc?`<small style="margin-left:6px">${esc(b.loc)}</small>`:''}<small>${b.archived?t('archived'):(b.sync?b.start+' · '+b.dur+' '+t('min'):t('noTime'))}</small></button>`).join('') +
+  const u = usage(), cmp = byUse(u);
+  const row = b => `<button class="bb" style="--c:${esc(b.color)};${b.archived?'opacity:.5':''}" data-act="editblock" data-id="${b.id}"><b>${esc(b.name)}</b>${b.loc?`<small class="lc">${esc(b.loc)}</small>`:''}<small class="r">${u[b.id]?u[b.id]+'× · ':''}${b.sync?b.start+' · '+b.dur+' '+t('min'):t('noTime')}</small></button>`;
+  const act = S.blocks.filter(b => !b.archived), pre = act.filter(b => PRESET.includes(b.id)).sort(cmp), own = act.filter(b => !PRESET.includes(b.id)).sort(cmp), arc = S.blocks.filter(b => b.archived).sort(cmp);
+  openSheet(`<h3>${t('blocksTitle')}</h3>` +
+    (own.length ? `<h4>${t('own')}</h4>` + own.map(row).join('') : '') +
+    (pre.length ? `<h4>${t('presets')}</h4>` + pre.map(row).join('') : '') +
+    (arc.length ? `<h4>${t('archivedH')}</h4>` + arc.map(row).join('') : '') +
     `<div class="btnrow"><button data-act="close">${t('close')}</button><button class="primary" data-act="newblock">${t('newBlock')}</button></div>`);
 }
 function openBlockEdit(id){
@@ -514,13 +550,14 @@ function openBlockEdit(id){
     <div class="grid"><div><label>${t('defStart')}</label><input type="time" id="be-start" value="${esc(b.start)}"></div><div><label>${t('durMin')}</label><input type="number" id="be-dur" min="0" step="5" value="${b.dur}"></div></div>
     <label>${t('color')}</label><input type="color" id="be-color" value="${esc(b.color)}">
     <label><input type="checkbox" id="be-sync" ${b.sync?'checked':''}> ${t('hasTime')}</label>
-    <div class="btnrow">${id==='new'?'':`<button class="danger" data-act="archive" data-id="${id}">${b.archived?t('restore'):t('archive')}</button>`}<button class="primary" data-act="saveblock" data-id="${id}">${t('save')}</button></div>`);
+    <div class="btnrow">${id==='new'?'':`<button data-act="archive" data-id="${id}">${b.archived?t('restore'):t('archive')}</button>`}${(id==='new'||PRESET.includes(id))?'':`<button class="danger" data-act="delblock" data-id="${id}">${t('delBlock')}</button>`}</div><div class="btnrow" style="margin-top:8px"><button data-act="blocks">${t('cancel')}</button><button class="primary" data-act="saveblock" data-id="${id}">${t('save')}</button></div>`);
 }
 function openSettings(){
   const cur = L();
   openSheet(`<h3>${t('settingsTitle')}</h3>
     <h4>${t('language')}</h4>
     <div class="seg2"><button data-act="lang" data-v="de" class="${cur==='de'?'on':''}">Deutsch</button><button data-act="lang" data-v="en" class="${cur==='en'?'on':''}">English</button></div>
+    <button class="lb" disabled style="opacity:.45">${t('syncSoon')}</button>
     <h4>${t('exportH')}</h4>
     <div class="btnrow" style="margin-top:0"><button data-act="ics">${t('icsBtn')}</button></div>
     <h4>${t('backupH')}</h4>
@@ -529,7 +566,7 @@ function openSettings(){
     <p class="hint">${t('backupHint')}</p>
     <h4>${t('infoTitle')}</h4>
     <button class="lb" data-act="info">${t('infoBtn')} ›</button>
-    <p class="copy">${t('version')} ${VERSION}</p>
+    <p class="copy">${t('version')} ${VERSION} · ${window.innerHeight}/${window.screen.height}</p>
     <div class="btnrow"><button data-act="close">${t('close')}</button></div>`);
 }
 function openInfo(){
@@ -601,6 +638,8 @@ document.addEventListener('click', ev => {
     case 'editblock': openBlockEdit(id); break;
     case 'archive': { const b = S.blocks.find(x => x.id === id); b.archived = !b.archived; save(); openBlocks(); render(); break; }
     case 'saveblock': saveBlock(id); break;
+    case 'delblock': { const n = S.entries.filter(x => x.blockId === id).length; if (confirm(t('delBlockQ', n))){ S.blocks = S.blocks.filter(x => x.id !== id); S.entries = S.entries.filter(x => x.blockId !== id); save(); openBlocks(); render(); toast(t('blockDeleted')); } break; }
+    
     case 'settings': openSettings(); break;
     case 'lang': S.settings.lang = el.dataset.v; save(); applySplash(); render(); openSettings(); break;
     case 'info': openInfo(); break;
@@ -724,6 +763,7 @@ const TC = {
   c_logout:'Abmelden', c_leave:'Crew verlassen', c_leaveQ:'Crew wirklich verlassen? Dein geteilter Plan wird dort gelöscht.', c_del:'Konto & Daten löschen', c_delQ:'Konto und alle Crew-Daten endgültig löschen? Die Daten auf diesem Gerät bleiben erhalten.',
   c_deleted:'Konto gelöscht', c_left:'Crew verlassen', c_published:'Plan geteilt', c_noPlans:'Noch keine geteilten Pläne in dieser Woche', c_wrongCode:'Code nicht gefunden', c_full:'Die Crew ist voll (max. 20)',
   c_err:'Fehler: ', c_cancel:'Schließen',
+  c_chat:'Crew-Chat', c_msgPh:'Nachricht …', c_send:'Senden', c_noMsg:'Noch keine Nachrichten', c_delMsg:'Nachricht löschen', c_homeNone:'Noch keine anstehenden Crew-Workouts', c_chatRules:'Bitte respektvoll bleiben. Nachrichten sind für alle in der Crew sichtbar.', c_thread:'Chat zum Termin',
   e_invalid_credential:'E-Mail oder Passwort falsch', e_email_already_in_use:'Diese E-Mail ist schon registriert', e_weak_password:'Passwort zu kurz (mind. 6 Zeichen)', e_invalid_email:'E-Mail ungültig',
   e_popup_closed_by_user:'Anmeldung abgebrochen', e_network_request_failed:'Keine Verbindung', e_permission_denied:'Keine Berechtigung', e_requires_recent_login:'Bitte neu anmelden und erneut versuchen',
   e_operation_not_allowed:'Diese Anmeldeart ist nicht aktiviert', e_popup_blocked:'Popup blockiert. Nutze E-Mail und Passwort.', e_too_many_requests:'Zu viele Versuche. Bitte später erneut.', e_unauthorized_domain:'Domain nicht freigegeben'
@@ -744,12 +784,13 @@ const TC = {
   c_logout:'Sign out', c_leave:'Leave crew', c_leaveQ:'Really leave the crew? Your shared plan will be deleted there.', c_del:'Delete account & data', c_delQ:'Permanently delete your account and all crew data? Data on this device is kept.',
   c_deleted:'Account deleted', c_left:'Left the crew', c_published:'Plan shared', c_noPlans:'No shared plans this week yet', c_wrongCode:'Code not found', c_full:'The crew is full (max. 20)',
   c_err:'Error: ', c_cancel:'Close',
+  c_chat:'Crew chat', c_msgPh:'Message …', c_send:'Send', c_noMsg:'No messages yet', c_delMsg:'Delete message', c_homeNone:'No upcoming crew workouts yet', c_chatRules:'Please stay respectful. Messages are visible to everyone in the crew.', c_thread:'Session chat',
   e_invalid_credential:'Wrong email or password', e_email_already_in_use:'This email is already registered', e_weak_password:'Password too short (min. 6 characters)', e_invalid_email:'Invalid email',
   e_popup_closed_by_user:'Sign-in cancelled', e_network_request_failed:'No connection', e_permission_denied:'Not allowed', e_requires_recent_login:'Please sign in again and retry',
   e_operation_not_allowed:'This sign-in method is not enabled', e_popup_blocked:'Popup blocked. Use email and password.', e_too_many_requests:'Too many attempts. Try again later.', e_unauthorized_domain:'Domain not authorised'
  }
 };
-let FB = null, ME = null, PROF = null, CREW = null, cmon = null, crewReady = false, pubT = null;
+let FB = null, ME = null, PROF = null, CREW = null, cmon = null, crewReady = false, pubT = null, CPLANS = null, chatUnsub = null;
 const MAXCREW = 20;
 async function fb(){
   if (FB) return FB;
@@ -785,6 +826,7 @@ function cerr(e){
   const k = 'e_' + raw, msg = TC[L()][k];
   toast(msg ? msg : t('c_err') + ((e && (e.code || e.message)) || ''), 4500);
 }
+const thr = (uid, x) => ('a_' + uid + '_' + x.date + '_' + x.start).slice(0, 100);
 const safeColor = c => /^#[0-9a-fA-F]{6}$/.test(c || '') ? c : '#9a96b5';
 const cslim = s => String(s == null ? '' : s).slice(0, 60);
 function newCode(){
@@ -839,7 +881,7 @@ function mainCrewSheet(){
   openSheet(`<h3>${esc(CREW.name || 'Crew')}</h3><p class="hint">${esc(PROF.name)} · ${t('c_members', n)}</p>
     <h4>${t('c_code')}</h4><div class="big" style="font-size:28px;letter-spacing:.12em">${esc(CREW.id)}</div>
     <div class="btnrow"><button data-act="ccopy">${t('c_copy')}</button><button class="${on?'primary':''}" data-act="cshare">${on ? t('c_shareOn') : t('c_shareOff')}</button></div>
-    <div class="btnrow" style="margin-top:8px"><button class="primary" data-act="cview">${t('c_view')}</button></div>
+    <div class="btnrow" style="margin-top:8px"><button class="primary" data-act="cview">${t('c_view')}</button><button class="primary" data-act="cchat">${t('c_chat')}</button></div>
     <div class="btnrow" style="margin-top:14px"><button data-act="cleave">${t('c_leave')}</button><button data-act="clogout">${t('c_logout')}</button></div>
     <div class="btnrow"><button class="danger" data-act="cdel">${t('c_del')}</button><button data-act="close">${t('c_cancel')}</button></div>`);
 }
@@ -857,12 +899,12 @@ async function showCrewWeek(){
   let any = false;
   for (let i = 0; i < 7; i++){
     const ds = ymd(addDays(cmon, i)), items = [];
-    docs.forEach(p => (p.entries || []).filter(x => x && x.date === ds).forEach(x => items.push({x, who: p.name, me: p.uid === ME.uid})));
+    docs.forEach(p => (p.entries || []).filter(x => x && x.date === ds).forEach(x => items.push({x, who: p.name, uid: p.uid, me: p.uid === ME.uid})));
     if (!items.length) continue;
     any = true;
     items.sort((a,b) => String(a.x.start).localeCompare(String(b.x.start)));
-    h += `<h4>${dn(i)} ${fmtDM(addDays(cmon,i))}</h4>` + items.map(({x, who, me}) =>
-      `<div class="pend" style="border-left:4px solid ${safeColor(x.color)}"><div class="n"><b>${esc(cslim(who))}${me ? ' (' + t('c_you') + ')' : ''}</b><small>${esc(cslim(x.start))} · ${esc(cslim(x.name))}${x.loc ? ' · ' + esc(cslim(x.loc)) : ''}</small></div></div>`).join('');
+    h += `<h4>${dn(i)} ${fmtDM(addDays(cmon,i))}</h4>` + items.map(({x, who, me, uid}) =>
+      `<div class="pend" style="border-left:4px solid ${safeColor(x.color)}"><div class="n"><b>${esc(cslim(who))}${me ? ' (' + t('c_you') + ')' : ''}</b><small>${esc(cslim(x.start))} · ${esc(cslim(x.name))}${x.loc ? ' · ' + esc(cslim(x.loc)) : ''}</small></div><button data-act="cthread" data-t="${esc(thr(uid, x))}" data-title="${esc(cslim(who) + ' · ' + dn(i) + ' ' + cslim(x.start) + ' ' + cslim(x.name))}" aria-label="${t('c_thread')}">💬</button></div>`).join('');
   }
   if (!any) h += `<p class="hint">${t('c_noPlans')}</p>`;
   h += `<div class="btnrow"><button data-act="cback">${t('back')}</button><button data-act="close">${t('c_cancel')}</button></div>`;
@@ -885,6 +927,7 @@ async function publishPlan(){
       return {date: e.date, start: e.start, dur: e.dur || 0, name: cslim(Lk.name), loc: cslim(Lk.loc), color: safeColor(Lk.color)};
     });
     await fs.setDoc(ref, {name: PROF.name, entries, updated: fs.serverTimestamp()});
+    crewRefresh();
   } catch(e){ cerr(e); }
 }
 async function afterLogin(){ await loadCrewState(); showCrew(); }
@@ -896,12 +939,78 @@ async function setProfile(extra){
 async function leaveCrew(){
   const {fs, db} = FB;
   if (!CREW) return;
+  try { await deleteMyMessages(); } catch(e){}
   try { await fs.deleteDoc(fs.doc(db, 'crews', CREW.id, 'plans', ME.uid)); } catch(e){}
   const rest = (CREW.members || []).filter(u => u !== ME.uid);
   if (rest.length === 0 && CREW.owner === ME.uid) await fs.deleteDoc(fs.doc(db, 'crews', CREW.id));
   else await fs.updateDoc(fs.doc(db, 'crews', CREW.id), {members: fs.arrayRemove(ME.uid)});
   CREW = null; if (PROF) PROF.crewId = null;
   await fs.setDoc(fs.doc(db, 'users', ME.uid), {name: PROF.name, crewId: null});
+}
+
+/* ---- Chat ---- */
+function chatStop(){ if (chatUnsub){ try { chatUnsub(); } catch(e){} chatUnsub = null; } }
+let chatThread = 'crew';
+function openChat(thread, title, back){
+  openSheet(`<h3>${esc(title)}</h3><p class="hint">${t('c_chatRules')}</p><div id="chatList" class="chatlist"><p class="hint">${t('c_load')}</p></div>
+    <div class="chatrow"><input type="text" id="chat-in" maxlength="500" placeholder="${t('c_msgPh')}"><button class="primary" data-act="csend">${t('c_send')}</button></div>
+    <div class="btnrow"><button data-act="${back}">${t('back')}</button><button data-act="close">${t('c_cancel')}</button></div>`);
+  chatThread = thread;
+  const {fs, db} = FB;
+  const q = fs.query(fs.collection(db, 'crews', CREW.id, 'messages'), fs.where('thread', '==', thread));
+  chatUnsub = fs.onSnapshot(q, snap => {
+    const ms = x => (x.ts && x.ts.toMillis) ? x.ts.toMillis() : Date.now();
+    const msgs = snap.docs.map(d => Object.assign({id: d.id}, d.data({serverTimestamps: 'estimate'}))).sort((a,b) => ms(a) - ms(b)).slice(-100);
+    const el = document.getElementById('chatList'); if (!el) return;
+    const td = todayStr();
+    el.innerHTML = msgs.length ? msgs.map(m => {
+      const d = new Date(ms(m)), me = m.uid === ME.uid, hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      const when = ymd(d) === td ? hm : `${fmtDM(d)} ${hm}`;
+      return `<div class="msg ${me ? 'me' : ''}"><div class="mh"><b>${esc(cslim(m.name))}</b><small>${when}</small>${me ? `<i data-act="cmdel" data-id="${esc(m.id)}" aria-label="${t('c_delMsg')}">×</i>` : ''}</div><p>${esc(String(m.text || '').slice(0, 500))}</p></div>`;
+    }).join('') : `<p class="hint">${t('c_noMsg')}</p>`;
+    el.scrollTop = el.scrollHeight;
+  }, e => cerr(e));
+}
+async function sendChat(){
+  const inp = document.getElementById('chat-in'); if (!inp) return;
+  const text = inp.value.trim(); if (!text) return;
+  inp.value = '';
+  const {fs, db} = FB;
+  try { await fs.addDoc(fs.collection(db, 'crews', CREW.id, 'messages'), {uid: ME.uid, name: PROF.name, text: text.slice(0, 500), thread: chatThread, ts: fs.serverTimestamp()}); }
+  catch(e){ inp.value = text; cerr(e); }
+}
+async function deleteMyMessages(){
+  const {fs, db} = FB;
+  const q = await fs.getDocs(fs.query(fs.collection(db, 'crews', CREW.id, 'messages'), fs.where('uid', '==', ME.uid)));
+  await Promise.all(q.docs.map(d => fs.deleteDoc(d.ref)));
+}
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target && ev.target.id === 'chat-in'){ ev.preventDefault(); sendChat(); } });
+
+/* ---- Startseiten-Panel ---- */
+async function crewRefresh(){
+  if (!(FB && ME && CREW)) return;
+  try {
+    const {fs, db} = FB, q = await fs.getDocs(fs.collection(db, 'crews', CREW.id, 'plans'));
+    CPLANS = q.docs.map(d => Object.assign({uid: d.id}, d.data()));
+  } catch(e){ return; }
+  if (page === 'home') render();
+}
+function crewPanel(){
+  if (!(S.settings.crewOn && CREW)) return '';
+  const now = Date.now(), td = todayStr(), items = [];
+  (CPLANS || []).filter(p => p.uid !== (ME && ME.uid)).forEach(p => (p.entries || []).forEach(x => {
+    if (!x || !x.date || !x.start || x.date < td) return;
+    const [h, m] = String(x.start).split(':').map(Number), s = parse(x.date); s.setHours(h || 0, m || 0, 0, 0);
+    const en = s.getTime() + (x.dur || 60) * 60000;
+    if (en > now) items.push({s: s.getTime(), who: p.name, x});
+  }));
+  items.sort((a, b) => a.s - b.s);
+  const rows = items.slice(0, 4).map(({who, x}) => {
+    const dd = Math.round((parse(x.date) - parse(td)) / 864e5);
+    const day = dd === 0 ? t('today') : dd === 1 ? t('tomorrow') : `${dn(wdOf(x.date))} ${fmtDM(parse(x.date))}`;
+    return `<div class="r"><span class="d" style="--c:${safeColor(x.color)}"><b>${esc(cslim(who))}</b> · ${esc(day)} ${esc(cslim(x.start))}</span><span>${esc(cslim(x.name))}${x.loc ? ' · ' + esc(cslim(x.loc)) : ''}</span></div>`;
+  }).join('');
+  return `<div class="panel cp" data-act="crew"><small>${t('c_title')}${CREW.name ? ' · ' + esc(CREW.name) : ''}</small>${rows || `<p class="hint" style="color:var(--mut);margin:6px 0 2px">${t('c_homeNone')}</p>`}</div>`;
 }
 
 /* ---- Aktionen ---- */
@@ -962,6 +1071,11 @@ async function crewAct(a, el){
       case 'cnext': cmon = addDays(cmon, 7); return showCrewWeek();
       case 'cthis': cmon = mondayOf(new Date()); return showCrewWeek();
       case 'cback': return showCrew();
+      case 'cweek': return showCrewWeek();
+      case 'cchat': return openChat('crew', t('c_chat'), 'cback');
+      case 'cthread': return openChat(el.dataset.t, el.dataset.title, 'cweek');
+      case 'csend': return sendChat();
+      case 'cmdel': { const {fs, db} = FB; await fs.deleteDoc(fs.doc(db, 'crews', CREW.id, 'messages', el.dataset.id)); return; }
       case 'cleave':
         if (!confirm(t('c_leaveQ'))) return;
         await leaveCrew(); S.settings.crewOn = false; save(); toast(t('c_left')); return showCrew();
@@ -984,11 +1098,13 @@ async function crewAct(a, el){
 // Dann sorgt die volle Bildschirmhöhe dafür, dass Hintergrund und Leiste ganz nach unten reichen.
 function fixHeight(){
   const sa = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-  const gap = window.screen.height - window.innerHeight;
-  if (sa && gap > 0 && gap < 90) document.documentElement.style.setProperty('--H', window.screen.height + 'px');
+  const sh = window.screen.height, ih = window.innerHeight, gap = sh - ih;
+  const portrait = window.matchMedia ? window.matchMedia('(orientation: portrait)').matches : true;
+  if (sa && portrait && gap > 0 && gap < 120) document.documentElement.style.setProperty('--H', sh + 'px');
   else document.documentElement.style.removeProperty('--H');
 }
-fixHeight(); addEventListener('resize', fixHeight); addEventListener('orientationchange', fixHeight);
+fixHeight(); [60, 300, 900, 2000].forEach(ms => setTimeout(fixHeight, ms));
+addEventListener('resize', fixHeight); addEventListener('orientationchange', () => setTimeout(fixHeight, 300)); addEventListener('pageshow', fixHeight); addEventListener('focus', fixHeight);
 applySplash();
 (function(){
   const sp = $('#splash'); if (!sp) return;
@@ -1003,8 +1119,8 @@ applySplash();
   };
   setTimeout(hide, 2600); sp.addEventListener('click', hide);
 })();
-document.addEventListener('visibilitychange', () => { if (!document.hidden && page === 'home') render(); });
-if (S.settings.crewOn && S.settings.crewConsent) crewInit().catch(() => {});
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ fixHeight(); if (typeof crewRefresh === 'function' && S.settings.crewOn) crewRefresh(); if (page === 'home') render(); } });
+if (S.settings.crewOn && S.settings.crewConsent) crewInit().then(crewRefresh).catch(() => {});
 render();
 if ('serviceWorker' in navigator){
   const had = !!navigator.serviceWorker.controller;
