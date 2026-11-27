@@ -76,7 +76,7 @@ button:active{opacity:.7}
 .bb{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin-bottom:6px;border-radius:16px!important;border-left:8px solid var(--c)!important}
 .bb small{color:#6b6478;margin-left:auto;font-size:12px}
 label{display:block;margin:12px 0 4px;color:#6b6478;font-size:12px;font-weight:700;letter-spacing:.06em}
-input[type=text],input[type=email],input[type=password],input[type=time],input[type=number],select{width:100%;background:#fff;color:var(--ink);border:1px solid #d9d1c5;border-radius:12px;padding:10px;font-size:16px}
+input[type=text],input[type=time],input[type=number],select{width:100%;background:#fff;color:var(--ink);border:1px solid #d9d1c5;border-radius:12px;padding:10px;font-size:16px}
 input[type=color]{width:100%;height:42px;background:#fff;border:1px solid #d9d1c5;border-radius:12px;padding:3px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 4px;font-size:14px}
@@ -158,6 +158,21 @@ a{color:var(--uv);font-weight:700}
 .msg .mh small{color:#6b6478}.msg .mh i{margin-left:auto;font-style:normal;color:#d93a2b;font-weight:800;padding:0 4px;cursor:pointer}
 .msg p{margin:2px 0 0;font-size:15px;white-space:pre-wrap;word-break:break-word}
 .chatrow{display:flex;gap:8px;margin-top:6px}.chatrow input{flex:1;min-width:0}.chatrow button{flex:none;padding:0 18px}
+
+.next{flex:none!important;max-height:none!important;min-height:0!important;padding:10px 14px;gap:4px;border-radius:20px}
+.next .nm{font-size:clamp(22px,7vw,30px)}
+.tiles .tile{padding:7px 10px}.tile b{font-size:22px}.tile b.sm{font-size:14px;line-height:1.8}
+.home{gap:8px}
+.cp{flex:1 1 auto!important;min-height:0!important;overflow:hidden;display:flex;flex-direction:column;cursor:default}
+.cp .rows{flex:1 1 auto;min-height:0;overflow:hidden}
+.cp .cl{margin-top:6px;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.cp .cl b{color:#fff}
+.cbtns{display:flex;gap:6px;margin-top:8px;flex:none}
+.cbtns button{flex:1;padding:10px 4px;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.cp.inv p{margin:6px 0 0;font-size:13px;color:var(--mut)}
+.ctabs{display:flex;gap:6px;overflow:auto;margin-top:6px;flex:none}
+.ctabs button{flex:none;padding:5px 12px;font-size:11px;font-weight:800}.ctabs .on{background:var(--uv)!important;border-color:var(--uv)!important}
+.panel:not(.cp){flex:0 1 112px!important;min-height:64px!important}
 </style>
 </head>
 <body>
@@ -169,7 +184,7 @@ a{color:var(--uv);font-weight:700}
 <script>
 'use strict';
 /* ---------- App-Infos ---------- */
-const VERSION = '1.3.0', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
+const VERSION = '1.4.0', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
 
 /* ---------- Helfer ---------- */
 const $ = s => document.querySelector(s);
@@ -192,27 +207,7 @@ function isoWeek(d){
 
 /* ---------- Daten ---------- */
 const KEY = 'workout_planer_v1';
-function seed(){
-  const blocks = [
-    {id:'squat', name:'Backsquat', loc:'Gym Evo Rosa', color:'#ff5a4a', start:'18:00', dur:90, sync:true},
-    {id:'dead',  name:'Deadlift',  loc:'Gym Evo Rosa', color:'#ff5a4a', start:'18:00', dur:90, sync:true},
-    {id:'jerk',  name:'Split Jerk',loc:'Gym Evo Rosa', color:'#ff5a4a', start:'18:00', dur:90, sync:true},
-    {id:'gren',  name:'CrossFit',  loc:'CrossFit Grenzgänger', color:'#7b61ff', start:'08:00', dur:60, sync:true},
-    {id:'cfm',   name:'Strength',  loc:'CrossFit CFM', color:'#3be8c8', start:'17:00', dur:60, sync:true},
-    {id:'oly',   name:'Olympic Weightlifting', loc:'CrossFit Grenzgänger', color:'#7b61ff', start:'11:00', dur:90, sync:true},
-    {id:'pil',   name:'Hot Pilates', loc:'Sunyoga', color:'#ffb02e', start:'12:15', dur:60, sync:true},
-    {id:'run',   name:'Laufen', loc:'', color:'#b6f24a', start:'07:00', dur:45, sync:true},
-    {id:'yoga',  name:'Yoga', loc:'', color:'#ff7ad9', start:'19:00', dur:60, sync:true},
-    {id:'rest',  name:'Restday', loc:'', color:'#9a96b5', start:'00:00', dur:0, sync:false}
-  ];
-  const plan = [['2026-11-30','squat','18:00'],['2026-12-01','jerk','18:00'],['2026-12-02','gren','08:00'],
-                ['2026-12-03','dead','18:00'],['2026-12-04','cfm','17:00'],['2026-12-05','pil','12:15'],['2026-12-06','oly','11:00']];
-  const entries = plan.map(([date,blockId,start]) => {
-    const b = blocks.find(x => x.id === blockId);
-    return {id:uid(), blockId, date, start, dur:b.dur, done:null};
-  });
-  return {blocks, entries, settings:{}};
-}
+function seed(){ return {blocks:[], entries:[], settings:{}}; }
 let S = (() => { try { const j = JSON.parse(localStorage.getItem(KEY)); if (j && j.blocks && j.entries) return j; } catch(e){} return seed(); })();
 S.settings = S.settings || {};
 delete S.settings.clientId; delete S.settings.calendarId;   // Google-Sync wurde entfernt
@@ -232,7 +227,7 @@ const T = {
  de: {
   sp2:'ATHLET', sp3:'Let’s train', athlete:'ATHLET',
   days:['Mo','Di','Mi','Do','Fr','Sa','So'], dayfull:['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'],
-  syncSoon:'Kalender-Sync (in Planung)', presets:'Vorgefertigt', own:'Eigene', archivedH:'Archiviert', delBlock:'Löschen', delBlockQ:n => n ? `Baustein löschen? ${n} Termin${n>1?'e':''} mit diesem Baustein werden ebenfalls entfernt. Alternativ kannst du ihn archivieren.` : 'Baustein löschen?', blockDeleted:'Baustein gelöscht',
+  noBlocks:'Du hast noch keine Bausteine. Lege einen neuen an. Sobald du in einer Crew bist, kannst du auch Bausteine der anderen übernehmen.', syncSoon:'Kalender-Sync (in Planung)', presets:'Vorgefertigt', own:'Eigene', archivedH:'Archiviert', delBlock:'Löschen', delBlockQ:n => n ? `Baustein löschen? ${n} Termin${n>1?'e':''} mit diesem Baustein werden ebenfalls entfernt. Alternativ kannst du ihn archivieren.` : 'Baustein löschen?', blockDeleted:'Baustein gelöscht',
   wk:'KW', today:'Heute', tomorrow:'Morgen', stats:'Stats', blocks:'Bausteine', free:'Frei',
   confirmN:n => `✓ ${n} Einheit${n>1?'en':''} bestätigen`,
   next:'Nächstes Workout', none:'Noch nichts geplant', noneHint:'Plane deine Woche im Wochenplan',
@@ -266,11 +261,12 @@ const T = {
    ['Einzelnen Termin anpassen','Tippe auf den Baustein selbst. Du änderst Trainingstyp, Ort, Farbe, Zeit, Tag und Status nur für diesen Termin. „Als neuen Baustein speichern“ macht daraus eine Vorlage.'],
    ['Bausteine','Unter „Bausteine“ legst du Vorlagen an und änderst sie. Änderungen gelten für alle Termine, die du nicht einzeln angepasst hast.'],
    ['Bestätigen & Lernen','Bestätige vergangene Einheiten mit ✓. Sie füllen die Statistik, und für die Vorschläge beim + zählen sie, sobald der Tag vorbei ist.'],
-   ['Crew (optional)','Tippe auf der Startseite auf 👥. Nach der Anmeldung gründest du eine Crew oder trittst mit einem Einladungscode bei. Dein Plan wird geteilt, solange „Teilen“ an ist. Auf der Startseite siehst du die nächsten Crew-Workouts. In der Crew-Woche siehst du, wer wann wo trainiert. Mit 💬 chattest du zu einem Termin, der Crew-Chat steht im Crew-Menü.'],
+   ['Crew (optional)','Tippe auf der Startseite auf 👥. Nach der Anmeldung gründest du eine Crew oder trittst mit einem Einladungscode bei. Dein Plan wird geteilt, solange „Teilen“ an ist. Auf der Startseite siehst du die nächsten Crew-Workouts und kommst mit einem Tipp zu Chat und Crew-Woche. Du kannst mehreren Crews angehören und zwischen ihnen wechseln. Beim Hinzufügen eines Workouts findest du unter „Aus deiner Crew“ die Bausteine der anderen. In der Crew-Woche siehst du, wer wann wo trainiert. Mit 💬 chattest du zu einem Termin, der Crew-Chat steht im Crew-Menü.'],
    ['Startseite','Zeigt dein nächstes Workout und deine Statistik. Mit ⌂ kommst du jederzeit dorthin zurück.'],
    ['Deine Daten','Alles bleibt auf deinem Gerät. Sichere es unter ⚙︎ → Daten sichern. Öffne die App immer über das Homescreen-Symbol, denn Safari speichert getrennt.']
   ],
   changes:[
+   ['1.4.0','27.11.2026',['Startseite: Crew-Bereich mit nächsten Workouts, letzter Chat-Nachricht und Schnellzugriff auf Chat, Crew-Woche und Crew-Menü','Mehrere Crews möglich','Neue Nutzer starten ohne Bausteine und können Bausteine aus ihrer Crew übernehmen','Layout am unteren Rand wird auf dem iPhone selbst repariert']],
    ['1.3.0','27.11.2026',['Chat: Crew-Chat und Chat pro Termin','Crew-Workouts auf der Startseite','Bausteine nach Häufigkeit sortiert, getrennt in Eigene und Vorgefertigte; eigene lassen sich löschen','Platzhalter für den Kalender-Sync','Mehr Zuverlässigkeit beim Layout am unteren Rand auf dem iPhone']],
    ['1.2.0','27.11.2026',['Neu: optionale Crew. Mit Konto (E-Mail oder Google) und Einladungscode teilst du deinen Wochenplan mit Freunden und siehst ihre Pläne','Konto und Crew-Daten lassen sich in der App löschen']],
    ['1.1.0','26.11.2026',['Sprache Deutsch/Englisch umschaltbar','Info-Bereich mit Anleitung, Datenschutz, Haftungsausschluss und Kontakt','Hinweis, wenn eine neue Version geladen wurde','Google-Kalender-Sync entfernt, der .ics-Export bleibt in den Einstellungen','Korrektur: Hintergrund reicht auf dem iPhone bis ganz nach unten']],
@@ -297,7 +293,7 @@ const T = {
  en: {
   sp2:'ATHLETE', sp3:'Let’s train', athlete:'ATHLETE',
   days:['Mo','Tu','We','Th','Fr','Sa','Su'], dayfull:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
-  syncSoon:'Calendar sync (planned)', presets:'Presets', own:'Custom', archivedH:'Archived', delBlock:'Delete', delBlockQ:n => n ? `Delete block? ${n} session${n>1?'s':''} using this block will be removed too. You can archive it instead.` : 'Delete block?', blockDeleted:'Block deleted',
+  noBlocks:'You have no blocks yet. Create a new one. Once you are in a crew you can also adopt blocks from the others.', syncSoon:'Calendar sync (planned)', presets:'Presets', own:'Custom', archivedH:'Archived', delBlock:'Delete', delBlockQ:n => n ? `Delete block? ${n} session${n>1?'s':''} using this block will be removed too. You can archive it instead.` : 'Delete block?', blockDeleted:'Block deleted',
   wk:'Wk', today:'Today', tomorrow:'Tomorrow', stats:'Stats', blocks:'Blocks', free:'Free',
   confirmN:n => `✓ Confirm ${n} session${n>1?'s':''}`,
   next:'Next workout', none:'Nothing planned yet', noneHint:'Plan your week in the weekly plan',
@@ -331,11 +327,12 @@ const T = {
    ['Editing a single session','Tap the block itself. You change workout type, location, color, time, day and status for this session only. “Save as new block” turns it into a template.'],
    ['Blocks','Under “Blocks” you create and edit templates. Changes apply to all sessions you have not edited individually.'],
    ['Confirming & learning','Confirm past sessions with ✓. They fill the statistics, and they count for the suggestions at + once the day is over.'],
-   ['Crew (optional)','Tap 👥 on the home screen. After signing in you create a crew or join with an invite code. Your plan is shared while “Sharing” is on. The home screen shows the next crew workouts. The crew week shows who trains when and where. Use 💬 to chat about a session, the crew chat is in the crew menu.'],
+   ['Crew (optional)','Tap 👥 on the home screen. After signing in you create a crew or join with an invite code. Your plan is shared while “Sharing” is on. The home screen shows the next crew workouts and gives you one-tap access to chat and the crew week. You can be in several crews and switch between them. When adding a workout, “From your crew” lists the others’ blocks. The crew week shows who trains when and where. Use 💬 to chat about a session, the crew chat is in the crew menu.'],
    ['Home','Shows your next workout and your statistics. ⌂ takes you back there at any time.'],
    ['Your data','Everything stays on your device. Back it up under ⚙︎ → Back up data. Always open the app from the home-screen icon, because Safari stores data separately.']
   ],
   changes:[
+   ['1.4.0','27.11.2026',['Home: crew area with next workouts, latest chat message and shortcuts to chat, crew week and crew menu','Several crews possible','New users start without blocks and can adopt blocks from their crew','Bottom-edge layout is repaired automatically on iPhone']],
    ['1.3.0','27.11.2026',['Chat: crew chat and chat per session','Crew workouts on the home screen','Blocks sorted by use, split into custom and presets; custom ones can be deleted','Placeholder for calendar sync','More reliable bottom-edge layout on iPhone']],
    ['1.2.0','27.11.2026',['New: optional crew. With an account (email or Google) and an invite code you share your weekly plan with friends and see theirs','Account and crew data can be deleted in the app']],
    ['1.1.0','26.11.2026',['Switch between German and English','Info section with guide, privacy, disclaimer and contact','Notice when a new version has been loaded','Google Calendar sync removed, the .ics export stays in settings','Fix: background now reaches the bottom on iPhone']],
@@ -477,7 +474,10 @@ function openAdd(ds){
   let h = `<h3>${t('addTitle', `${dn(wd)} ${fmtDM(parse(ds))}`)}</h3>`;
   if (sug.length) h += `<h4>${t('suggestions')}</h4>` + sug.map(s => blockBtn(s.block, ds, t('sugInfo', s.n, dn(wd), s.time))).join('');
   h += `<h4>${t('allBlocks')}</h4>` + S.blocks.filter(b => !b.archived).sort(byUse(usage())).map(b => blockBtn(b, ds, b.sync ? `${b.start} · ${b.dur} ${t('min')}` : '')).join('');
-  h += `<div class="btnrow"><button data-act="close">${t('cancel')}</button></div>`;
+  const cb = typeof crewBlocks === 'function' ? crewBlocks() : [];
+  if (cb.length) h += `<h4>${t('c_fromCrew')}</h4>` + cb.map(x => `<button class="bb" style="--c:${esc(x.color)}" data-act="addcrew" data-date="${ds}" data-name="${esc(x.name)}" data-loc="${esc(x.loc)}" data-color="${esc(x.color)}" data-start="${esc(x.start)}" data-dur="${esc(x.dur)}"><b>${esc(x.name)}</b>${x.loc?`<small class="lc">${esc(x.loc)}</small>`:''}<small class="r">${t('c_crewUse', x.m)} · ${esc(x.start)}</small></button>`).join('');
+  if (!S.blocks.some(b => !b.archived) && !cb.length) h += `<p class="hint">${t('noBlocks')}</p>`;
+  h += `<div class="btnrow"><button data-act="close">${t('cancel')}</button><button class="primary" data-act="newblock">${t('newBlock')}</button></div>`;
   openSheet(h);
 }
 function openEdit(id){
@@ -763,6 +763,7 @@ const TC = {
   c_logout:'Abmelden', c_leave:'Crew verlassen', c_leaveQ:'Crew wirklich verlassen? Dein geteilter Plan wird dort gelöscht.', c_del:'Konto & Daten löschen', c_delQ:'Konto und alle Crew-Daten endgültig löschen? Die Daten auf diesem Gerät bleiben erhalten.',
   c_deleted:'Konto gelöscht', c_left:'Crew verlassen', c_published:'Plan geteilt', c_noPlans:'Noch keine geteilten Pläne in dieser Woche', c_wrongCode:'Code nicht gefunden', c_full:'Die Crew ist voll (max. 20)',
   c_err:'Fehler: ', c_cancel:'Schließen',
+  c_btnChat:'💬 Chat', c_btnWeek:'Crew-Woche', c_btnMenu:'Crew', c_start:'Crew starten oder beitreten', c_startHint:'Teile deinen Plan mit Freunden, sieh ihre Workouts und chatte mit ihnen.', c_loading:'Crew wird geladen …', c_fromCrew:'Aus deiner Crew', c_crewUse:n => `${n}× in der Crew`, c_more:'+ Weitere Crew', c_switch:'Deine Crews', c_chatNone:'Noch keine Chat-Nachrichten',
   c_chat:'Crew-Chat', c_msgPh:'Nachricht …', c_send:'Senden', c_noMsg:'Noch keine Nachrichten', c_delMsg:'Nachricht löschen', c_homeNone:'Noch keine anstehenden Crew-Workouts', c_chatRules:'Bitte respektvoll bleiben. Nachrichten sind für alle in der Crew sichtbar.', c_thread:'Chat zum Termin',
   e_invalid_credential:'E-Mail oder Passwort falsch', e_email_already_in_use:'Diese E-Mail ist schon registriert', e_weak_password:'Passwort zu kurz (mind. 6 Zeichen)', e_invalid_email:'E-Mail ungültig',
   e_popup_closed_by_user:'Anmeldung abgebrochen', e_network_request_failed:'Keine Verbindung', e_permission_denied:'Keine Berechtigung', e_requires_recent_login:'Bitte neu anmelden und erneut versuchen',
@@ -784,13 +785,17 @@ const TC = {
   c_logout:'Sign out', c_leave:'Leave crew', c_leaveQ:'Really leave the crew? Your shared plan will be deleted there.', c_del:'Delete account & data', c_delQ:'Permanently delete your account and all crew data? Data on this device is kept.',
   c_deleted:'Account deleted', c_left:'Left the crew', c_published:'Plan shared', c_noPlans:'No shared plans this week yet', c_wrongCode:'Code not found', c_full:'The crew is full (max. 20)',
   c_err:'Error: ', c_cancel:'Close',
+  c_btnChat:'💬 Chat', c_btnWeek:'Crew week', c_btnMenu:'Crew', c_start:'Start or join a crew', c_startHint:'Share your plan with friends, see their workouts and chat with them.', c_loading:'Loading crew …', c_fromCrew:'From your crew', c_crewUse:n => `${n}× in the crew`, c_more:'+ Another crew', c_switch:'Your crews', c_chatNone:'No chat messages yet',
   c_chat:'Crew chat', c_msgPh:'Message …', c_send:'Send', c_noMsg:'No messages yet', c_delMsg:'Delete message', c_homeNone:'No upcoming crew workouts yet', c_chatRules:'Please stay respectful. Messages are visible to everyone in the crew.', c_thread:'Session chat',
   e_invalid_credential:'Wrong email or password', e_email_already_in_use:'This email is already registered', e_weak_password:'Password too short (min. 6 characters)', e_invalid_email:'Invalid email',
   e_popup_closed_by_user:'Sign-in cancelled', e_network_request_failed:'No connection', e_permission_denied:'Not allowed', e_requires_recent_login:'Please sign in again and retry',
   e_operation_not_allowed:'This sign-in method is not enabled', e_popup_blocked:'Popup blocked. Use email and password.', e_too_many_requests:'Too many attempts. Try again later.', e_unauthorized_domain:'Domain not authorised'
  }
 };
-let FB = null, ME = null, PROF = null, CREW = null, cmon = null, crewReady = false, pubT = null, CPLANS = null, chatUnsub = null;
+let FB = null, ME = null, PROF = null, CREW = null, cmon = null, crewReady = false, pubT = null, CPLANS = null, chatUnsub = null, CREWS = [], CPALL = {}, CLAST = null;
+const MAXMY = 5;
+const sharing = id => !(S.settings.noShare && S.settings.noShare[id]);
+function setActive(id){ if (id) S.settings.actCrew = id; CREW = CREWS.find(x => x.id === S.settings.actCrew) || CREWS[0] || null; if (CREW) S.settings.actCrew = CREW.id; CPLANS = CREW ? (CPALL[CREW.id] || []) : []; }
 const MAXCREW = 20;
 async function fb(){
   if (FB) return FB;
@@ -808,18 +813,26 @@ async function crewInit(){
   crewReady = true;
 }
 async function loadCrewState(){
-  PROF = null; CREW = null;
+  PROF = null; CREW = null; CREWS = [];
   if (!ME) return;
   const {fs, db} = FB;
   const us = await fs.getDoc(fs.doc(db, 'users', ME.uid));
   PROF = us.exists() ? us.data() : null;
-  if (PROF && PROF.crewId){
-    try {
-      const c = await fs.getDoc(fs.doc(db, 'crews', PROF.crewId));
-      if (c.exists() && (c.data().members||[]).includes(ME.uid)) CREW = Object.assign({id: c.id}, c.data());
-      else PROF.crewId = null;
-    } catch(e){ PROF.crewId = null; }
+  if (PROF){
+    const ids = Array.isArray(PROF.crewIds) ? PROF.crewIds.slice() : [];
+    if (PROF.crewId && !ids.includes(PROF.crewId)) ids.push(PROF.crewId);
+    const keep = [];
+    const res = await Promise.all(ids.map(async id => {
+      try {
+        const cd = await fs.getDoc(fs.doc(db, 'crews', id));
+        if (cd.exists() && (cd.data().members || []).includes(ME.uid)){ keep.push(id); return Object.assign({id: cd.id}, cd.data()); }
+      } catch(e){ keep.push(id); }
+      return null;
+    }));
+    CREWS = res.filter(Boolean);
+    PROF.crewIds = keep; delete PROF.crewId;
   }
+  setActive();
 }
 function cerr(e){
   const raw = String((e && e.code) || '').replace(/^(auth|firestore)\//,'').replace(/-/g,'_');
@@ -851,7 +864,7 @@ async function openCrew(){
 function showCrew(){
   if (!ME) return loginSheet();
   if (!PROF || !PROF.name) return nameSheet();
-  if (!CREW) return noCrewSheet();
+  if (!CREWS.length) return noCrewSheet();
   mainCrewSheet();
 }
 function loginSheet(){
@@ -867,23 +880,23 @@ function nameSheet(){
     <input type="text" id="c-name" maxlength="30" placeholder="${t('c_namePh')}" value="${esc((PROF && PROF.name) || '')}">
     <div class="btnrow"><button data-act="close">${t('c_cancel')}</button><button class="primary" data-act="cname">${t('c_save')}</button></div>`);
 }
-function noCrewSheet(){
+function noCrewSheet(back){
   openSheet(`<h3>${t('c_noCrew')}</h3>
     <h4>${t('c_create')}</h4><input type="text" id="c-cname" maxlength="30" placeholder="${t('c_crewNamePh')}">
     <div class="btnrow"><button class="primary" data-act="ccreate">${t('c_create')}</button></div>
     <h4>${t('c_join')}</h4><input type="text" id="c-code" maxlength="8" autocapitalize="characters" placeholder="${t('c_codePh')}" style="text-transform:uppercase">
     <div class="btnrow"><button class="primary" data-act="cjoin">${t('c_go')}</button></div>
-    <div class="btnrow" style="margin-top:14px"><button data-act="clogout">${t('c_logout')}</button><button class="danger" data-act="cdel">${t('c_del')}</button></div>
-    <div class="btnrow"><button data-act="close">${t('c_cancel')}</button></div>`);
+    ${back ? `<div class="btnrow" style="margin-top:14px"><button data-act="cback">${t('back')}</button><button data-act="close">${t('c_cancel')}</button></div>` : `<div class="btnrow" style="margin-top:14px"><button data-act="clogout">${t('c_logout')}</button><button class="danger" data-act="cdel">${t('c_del')}</button></div><div class="btnrow"><button data-act="close">${t('c_cancel')}</button></div>`}`);
 }
 function mainCrewSheet(){
-  const on = !!S.settings.share, n = (CREW.members || []).length;
-  openSheet(`<h3>${esc(CREW.name || 'Crew')}</h3><p class="hint">${esc(PROF.name)} · ${t('c_members', n)}</p>
+  const on = sharing(CREW.id), n = (CREW.members || []).length;
+  const sw = CREWS.length > 1 ? `<h4>${t('c_switch')}</h4><div class="days7" style="flex-wrap:wrap">${CREWS.map(x => `<button data-act="cact" data-id="${esc(x.id)}" class="${x.id === CREW.id ? 'on' : ''}">${esc(x.name || 'Crew')}</button>`).join('')}</div>` : '';
+  openSheet(`<h3>${esc(CREW.name || 'Crew')}</h3><p class="hint">${esc(PROF.name)} · ${t('c_members', n)}</p>${sw}
     <h4>${t('c_code')}</h4><div class="big" style="font-size:28px;letter-spacing:.12em">${esc(CREW.id)}</div>
     <div class="btnrow"><button data-act="ccopy">${t('c_copy')}</button><button class="${on?'primary':''}" data-act="cshare">${on ? t('c_shareOn') : t('c_shareOff')}</button></div>
     <div class="btnrow" style="margin-top:8px"><button class="primary" data-act="cview">${t('c_view')}</button><button class="primary" data-act="cchat">${t('c_chat')}</button></div>
     <div class="btnrow" style="margin-top:14px"><button data-act="cleave">${t('c_leave')}</button><button data-act="clogout">${t('c_logout')}</button></div>
-    <div class="btnrow"><button class="danger" data-act="cdel">${t('c_del')}</button><button data-act="close">${t('c_cancel')}</button></div>`);
+    <div class="btnrow"><button data-act="cdel" class="danger">${t('c_del')}</button>${CREWS.length < MAXMY ? `<button data-act="cmore">${t('c_more')}</button>` : ''}</div><div class="btnrow"><button data-act="close">${t('c_cancel')}</button></div>`);
 }
 async function showCrewWeek(){
   cmon = cmon || mondayOf(new Date());
@@ -913,39 +926,42 @@ async function showCrewWeek(){
 
 /* ---- Teilen ---- */
 function schedulePublish(){
-  if (!(FB && ME && PROF && PROF.name && CREW && S.settings.share)) return;
+  if (!(FB && ME && PROF && PROF.name && CREWS.length)) return;
   clearTimeout(pubT); pubT = setTimeout(publishPlan, 1500);
 }
 async function publishPlan(){
-  if (!(FB && ME && PROF && CREW)) return;
-  const {fs, db} = FB, ref = fs.doc(db, 'crews', CREW.id, 'plans', ME.uid);
-  try {
-    if (!S.settings.share){ await fs.deleteDoc(ref); return; }
-    const from = ymd(addDays(new Date(), -7));
-    const entries = S.entries.filter(e => blockOf(e) && blockOf(e).sync && e.date >= from).slice(0, 300).map(e => {
-      const Lk = look(e);
-      return {date: e.date, start: e.start, dur: e.dur || 0, name: cslim(Lk.name), loc: cslim(Lk.loc), color: safeColor(Lk.color)};
-    });
-    await fs.setDoc(ref, {name: PROF.name, entries, updated: fs.serverTimestamp()});
-    crewRefresh();
-  } catch(e){ cerr(e); }
+  if (!(FB && ME && PROF && CREWS.length)) return;
+  const {fs, db} = FB, from = ymd(addDays(new Date(), -7));
+  const entries = S.entries.filter(e => blockOf(e) && blockOf(e).sync && e.date >= from).slice(0, 300).map(e => {
+    const Lk = look(e);
+    return {date: e.date, start: e.start, dur: e.dur || 0, name: cslim(Lk.name), loc: cslim(Lk.loc), color: safeColor(Lk.color)};
+  });
+  for (const cr of CREWS){
+    const ref = fs.doc(db, 'crews', cr.id, 'plans', ME.uid);
+    try {
+      if (!sharing(cr.id)) await fs.deleteDoc(ref);
+      else await fs.setDoc(ref, {name: PROF.name, entries, updated: fs.serverTimestamp()});
+    } catch(e){ cerr(e); }
+  }
+  crewRefresh();
 }
 async function afterLogin(){ await loadCrewState(); showCrew(); }
 async function setProfile(extra){
   const {fs, db} = FB;
   PROF = Object.assign({}, PROF || {}, extra);
-  await fs.setDoc(fs.doc(db, 'users', ME.uid), {name: PROF.name, crewId: PROF.crewId || null});
+  await fs.setDoc(fs.doc(db, 'users', ME.uid), {name: PROF.name, crewIds: PROF.crewIds || []});
 }
-async function leaveCrew(){
+async function leaveCrew(cr){
   const {fs, db} = FB;
-  if (!CREW) return;
-  try { await deleteMyMessages(); } catch(e){}
-  try { await fs.deleteDoc(fs.doc(db, 'crews', CREW.id, 'plans', ME.uid)); } catch(e){}
-  const rest = (CREW.members || []).filter(u => u !== ME.uid);
-  if (rest.length === 0 && CREW.owner === ME.uid) await fs.deleteDoc(fs.doc(db, 'crews', CREW.id));
-  else await fs.updateDoc(fs.doc(db, 'crews', CREW.id), {members: fs.arrayRemove(ME.uid)});
-  CREW = null; if (PROF) PROF.crewId = null;
-  await fs.setDoc(fs.doc(db, 'users', ME.uid), {name: PROF.name, crewId: null});
+  cr = cr || CREW; if (!cr) return;
+  try { await deleteMyMessages(cr.id); } catch(e){}
+  try { await fs.deleteDoc(fs.doc(db, 'crews', cr.id, 'plans', ME.uid)); } catch(e){}
+  const rest = (cr.members || []).filter(u => u !== ME.uid);
+  if (rest.length === 0 && cr.owner === ME.uid) await fs.deleteDoc(fs.doc(db, 'crews', cr.id));
+  else await fs.updateDoc(fs.doc(db, 'crews', cr.id), {members: fs.arrayRemove(ME.uid)});
+  CREWS = CREWS.filter(x => x.id !== cr.id); delete CPALL[cr.id];
+  await setProfile({crewIds: (PROF.crewIds || []).filter(x => x !== cr.id)});
+  setActive(); save();
 }
 
 /* ---- Chat ---- */
@@ -979,38 +995,66 @@ async function sendChat(){
   try { await fs.addDoc(fs.collection(db, 'crews', CREW.id, 'messages'), {uid: ME.uid, name: PROF.name, text: text.slice(0, 500), thread: chatThread, ts: fs.serverTimestamp()}); }
   catch(e){ inp.value = text; cerr(e); }
 }
-async function deleteMyMessages(){
+async function deleteMyMessages(crewId){
   const {fs, db} = FB;
-  const q = await fs.getDocs(fs.query(fs.collection(db, 'crews', CREW.id, 'messages'), fs.where('uid', '==', ME.uid)));
+  const q = await fs.getDocs(fs.query(fs.collection(db, 'crews', crewId, 'messages'), fs.where('uid', '==', ME.uid)));
   await Promise.all(q.docs.map(d => fs.deleteDoc(d.ref)));
 }
 document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target && ev.target.id === 'chat-in'){ ev.preventDefault(); sendChat(); } });
 
 /* ---- Startseiten-Panel ---- */
 async function crewRefresh(){
-  if (!(FB && ME && CREW)) return;
-  try {
-    const {fs, db} = FB, q = await fs.getDocs(fs.collection(db, 'crews', CREW.id, 'plans'));
-    CPLANS = q.docs.map(d => Object.assign({uid: d.id}, d.data()));
-  } catch(e){ return; }
+  if (!(FB && ME && CREWS.length)) return;
+  const {fs, db} = FB;
+  await Promise.all(CREWS.map(async cr => {
+    try { const q = await fs.getDocs(fs.collection(db, 'crews', cr.id, 'plans')); CPALL[cr.id] = q.docs.map(d => Object.assign({uid: d.id}, d.data())); } catch(e){}
+  }));
+  setActive();
+  CLAST = null;
+  if (CREW){
+    try {
+      const q = await fs.getDocs(fs.query(fs.collection(db, 'crews', CREW.id, 'messages'), fs.orderBy('ts', 'desc'), fs.limit(15)));
+      const m = q.docs.map(d => d.data()).find(x => x.thread === 'crew');
+      if (m) CLAST = {name: cslim(m.name), text: String(m.text || '').slice(0, 90)};
+    } catch(e){}
+  }
   if (page === 'home') render();
 }
 function crewPanel(){
-  if (!(S.settings.crewOn && CREW)) return '';
+  const btn = (a, l, p) => `<button ${p ? 'class="primary" ' : ''}data-act="${a}">${l}</button>`;
+  if (!S.settings.crewOn) return `<div class="panel cp inv"><small>${t('c_title')}</small><p>${t('c_startHint')}</p><div class="cbtns">${btn('crew', t('c_start'), true)}</div></div>`;
+  if (!CREW) return `<div class="panel cp"><small>${t('c_title')}</small><p class="hint" style="color:var(--mut)">${t('c_loading')}</p></div>`;
   const now = Date.now(), td = todayStr(), items = [];
   (CPLANS || []).filter(p => p.uid !== (ME && ME.uid)).forEach(p => (p.entries || []).forEach(x => {
     if (!x || !x.date || !x.start || x.date < td) return;
     const [h, m] = String(x.start).split(':').map(Number), s = parse(x.date); s.setHours(h || 0, m || 0, 0, 0);
-    const en = s.getTime() + (x.dur || 60) * 60000;
-    if (en > now) items.push({s: s.getTime(), who: p.name, x});
+    if (s.getTime() + (x.dur || 60) * 60000 > now) items.push({s: s.getTime(), who: p.name, x});
   }));
   items.sort((a, b) => a.s - b.s);
-  const rows = items.slice(0, 4).map(({who, x}) => {
+  const rows = items.slice(0, 5).map(({who, x}) => {
     const dd = Math.round((parse(x.date) - parse(td)) / 864e5);
     const day = dd === 0 ? t('today') : dd === 1 ? t('tomorrow') : `${dn(wdOf(x.date))} ${fmtDM(parse(x.date))}`;
     return `<div class="r"><span class="d" style="--c:${safeColor(x.color)}"><b>${esc(cslim(who))}</b> · ${esc(day)} ${esc(cslim(x.start))}</span><span>${esc(cslim(x.name))}${x.loc ? ' · ' + esc(cslim(x.loc)) : ''}</span></div>`;
   }).join('');
-  return `<div class="panel cp" data-act="crew"><small>${t('c_title')}${CREW.name ? ' · ' + esc(CREW.name) : ''}</small>${rows || `<p class="hint" style="color:var(--mut);margin:6px 0 2px">${t('c_homeNone')}</p>`}</div>`;
+  const tabs = CREWS.length > 1 ? `<div class="ctabs">${CREWS.map(x => `<button data-act="cact" data-id="${esc(x.id)}" class="${x.id === CREW.id ? 'on' : ''}">${esc(x.name || 'Crew')}</button>`).join('')}</div>` : '';
+  const last = CLAST ? `<div class="cl">💬 <b>${esc(CLAST.name)}:</b> ${esc(CLAST.text)}</div>` : `<div class="cl" style="opacity:.6">💬 ${t('c_chatNone')}</div>`;
+  return `<div class="panel cp"><small>${t('c_title')} · ${esc(CREW.name || '')} · ${t('c_members', (CREW.members || []).length)}</small>${tabs}<div class="rows">${rows || `<p class="hint" style="color:var(--mut);margin:6px 0 2px">${t('c_homeNone')}</p>`}</div>${last}<div class="cbtns">${btn('hchat', t('c_btnChat'), true)}${btn('hweek', t('c_btnWeek'))}${btn('hmenu', t('c_btnMenu'))}</div></div>`;
+}
+function crewBlocks(){
+  const g = {};
+  Object.values(CPALL).forEach(arr => (arr || []).forEach(p => {
+    if (ME && p.uid === ME.uid) return;
+    (p.entries || []).forEach(x => {
+      if (!x || !x.name) return;
+      const key = (x.name + '|' + (x.loc || '')).toLowerCase();
+      const o = g[key] || (g[key] = {name: cslim(x.name), loc: cslim(x.loc), color: safeColor(x.color), who: new Set(), n: 0, st: {}, du: {}});
+      o.who.add(p.uid); o.n++; o.st[x.start] = (o.st[x.start] || 0) + 1; o.du[x.dur] = (o.du[x.dur] || 0) + 1;
+    });
+  }));
+  const have = new Set(S.blocks.map(b => (b.name + '|' + (b.loc || '')).toLowerCase()));
+  const top = o => Object.entries(o).sort((a, b) => b[1] - a[1])[0][0];
+  return Object.entries(g).filter(([k]) => !have.has(k)).map(([k, o]) => ({name: o.name, loc: o.loc, color: o.color, m: o.who.size, n: o.n, start: top(o.st), dur: top(o.du)}))
+    .sort((a, b) => b.m - a.m || b.n - a.n).slice(0, 12);
 }
 
 /* ---- Aktionen ---- */
@@ -1044,8 +1088,8 @@ async function crewAct(a, el){
         let code = newCode();
         for (let i = 0; i < 5 && (await fs.getDoc(fs.doc(db, 'crews', code))).exists(); i++) code = newCode();
         await fs.setDoc(fs.doc(db, 'crews', code), {name: n.slice(0, 30), owner: ME.uid, members: [ME.uid], created: fs.serverTimestamp()});
-        await setProfile({crewId: code});
-        S.settings.share = true; S.settings.crewOn = true; save();
+        await setProfile({crewIds: [...(PROF.crewIds || []), code]});
+        S.settings.actCrew = code; S.settings.crewOn = true; save();
         await loadCrewState(); publishPlan(); return showCrew(); }
       case 'cjoin': {
         const code = v('c-code').toUpperCase().replace(/[^A-Z0-9]/g, ''), {fs, db} = FB;
@@ -1057,37 +1101,51 @@ async function crewAct(a, el){
           if (mem.length >= MAXCREW) return toast(t('c_full'));
           await fs.updateDoc(fs.doc(db, 'crews', code), {members: fs.arrayUnion(ME.uid)});
         }
-        await setProfile({crewId: code});
-        S.settings.share = true; S.settings.crewOn = true; save();
+        await setProfile({crewIds: [...new Set([...(PROF.crewIds || []), code])]});
+        S.settings.actCrew = code; S.settings.crewOn = true; save();
         await loadCrewState(); publishPlan(); return showCrew(); }
       case 'ccopy':
         try { await navigator.clipboard.writeText(CREW.id); } catch(e){}
         return toast(t('c_copied'));
       case 'cshare':
-        S.settings.share = !S.settings.share; save(); await publishPlan();
-        toast(S.settings.share ? t('c_published') : t('c_shareOff')); return mainCrewSheet();
+        S.settings.noShare = S.settings.noShare || {};
+        if (sharing(CREW.id)) S.settings.noShare[CREW.id] = true; else delete S.settings.noShare[CREW.id];
+        save(); await publishPlan();
+        toast(sharing(CREW.id) ? t('c_published') : t('c_shareOff')); return mainCrewSheet();
       case 'cview': cmon = mondayOf(new Date()); return showCrewWeek();
       case 'cprev': cmon = addDays(cmon, -7); return showCrewWeek();
       case 'cnext': cmon = addDays(cmon, 7); return showCrewWeek();
       case 'cthis': cmon = mondayOf(new Date()); return showCrewWeek();
       case 'cback': return showCrew();
       case 'cweek': return showCrewWeek();
+      case 'cmore': return noCrewSheet('back');
+      case 'cact': setActive(el.dataset.id); save(); if (sheetOpen()) mainCrewSheet(); render(); crewRefresh(); return;
+      case 'hchat': if (!(FB && ME && CREW)) return openCrew(); return openChat('crew', t('c_chat'), 'close');
+      case 'hweek': if (!(FB && ME && CREW)) return openCrew(); cmon = mondayOf(new Date()); return showCrewWeek();
+      case 'hmenu': return openCrew();
+      case 'addcrew': {
+        const d = el.dataset, name = cslim(d.name), loc = cslim(d.loc), color = safeColor(d.color);
+        const start = /^\d\d:\d\d$/.test(d.start) ? d.start : '18:00', dur = Math.min(600, Math.max(0, parseInt(d.dur, 10) || 60));
+        let b = S.blocks.find(x => (x.name + '|' + (x.loc || '')).toLowerCase() === (name + '|' + loc).toLowerCase());
+        if (b) b.archived = false; else { b = {id: 'b_' + uid(), name, loc, color, start, dur, sync: true}; S.blocks.push(b); }
+        S.entries.push({id: uid(), blockId: b.id, date: d.date, start: learnedTime(b.id, wdOf(d.date)), dur: b.dur, done: null});
+        save(); closeSheet(); render(); return; }
       case 'cchat': return openChat('crew', t('c_chat'), 'cback');
       case 'cthread': return openChat(el.dataset.t, el.dataset.title, 'cweek');
       case 'csend': return sendChat();
       case 'cmdel': { const {fs, db} = FB; await fs.deleteDoc(fs.doc(db, 'crews', CREW.id, 'messages', el.dataset.id)); return; }
       case 'cleave':
         if (!confirm(t('c_leaveQ'))) return;
-        await leaveCrew(); S.settings.crewOn = false; save(); toast(t('c_left')); return showCrew();
+        await leaveCrew(); S.settings.crewOn = CREWS.length > 0; save(); toast(t('c_left')); render(); return showCrew();
       case 'clogout':
         await FB.au.signOut(FB.auth); ME = null; PROF = null; CREW = null; S.settings.crewOn = false; save(); return loginSheet();
       case 'cdel': {
         if (!confirm(t('c_delQ'))) return;
         const {fs, db} = FB;
-        if (CREW) await leaveCrew();
+        for (const cr of CREWS.slice()) await leaveCrew(cr);
         try { await fs.deleteDoc(fs.doc(db, 'users', ME.uid)); } catch(e){}
         await FB.au.deleteUser(FB.auth.currentUser);
-        ME = null; PROF = null; CREW = null; S.settings.crewOn = false; S.settings.share = false; save();
+        ME = null; PROF = null; CREW = null; S.settings.crewOn = false; save();
         toast(t('c_deleted')); return closeSheet(); }
     }
   } catch(e){ cerr(e); }
@@ -1096,15 +1154,24 @@ async function crewAct(a, el){
 /* ---------- Start ---------- */
 // iOS-Homescreen-Apps: Das Layout-Viewport ist mit viewport-fit=cover oft um die Statusleiste zu kurz.
 // Dann sorgt die volle Bildschirmhöhe dafür, dass Hintergrund und Leiste ganz nach unten reichen.
-function fixHeight(){
-  const sa = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-  const sh = window.screen.height, ih = window.innerHeight, gap = sh - ih;
-  const portrait = window.matchMedia ? window.matchMedia('(orientation: portrait)').matches : true;
-  if (sa && portrait && gap > 0 && gap < 120) document.documentElement.style.setProperty('--H', sh + 'px');
-  else document.documentElement.style.removeProperty('--H');
+function isSA(){ return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }
+function gapNow(){ const portrait = window.matchMedia ? window.matchMedia('(orientation: portrait)').matches : true; const g = window.screen.height - window.innerHeight; return (isSA() && portrait && g > 20 && g < 120) ? g : 0; }
+function fixHeight(){ document.documentElement.style.removeProperty('--H'); }
+// iOS-Fehler: Die Homescreen-App bekommt manchmal ein zu kurzes Fenster (ca. 59 px). CSS kann das nicht ausgleichen.
+// Wir versuchen eine Neuberechnung des Viewports und laden notfalls einmal neu.
+function healViewport(){
+  if (!gapNow()) return;
+  const m = document.querySelector('meta[name=viewport]');
+  if (m){ const v = m.content; m.content = 'width=device-width,initial-scale=1'; setTimeout(() => { m.content = v; }, 60); }
+  window.scrollTo(0, 0);
+  setTimeout(() => {
+    if (!gapNow()) return;
+    let n = 0; try { n = +sessionStorage.getItem('hx') || 0; } catch(e){}
+    if (n < 2){ try { sessionStorage.setItem('hx', String(n + 1)); } catch(e){} location.reload(); }
+  }, 900);
 }
-fixHeight(); [60, 300, 900, 2000].forEach(ms => setTimeout(fixHeight, ms));
-addEventListener('resize', fixHeight); addEventListener('orientationchange', () => setTimeout(fixHeight, 300)); addEventListener('pageshow', fixHeight); addEventListener('focus', fixHeight);
+setTimeout(healViewport, 250);
+addEventListener('pageshow', () => setTimeout(healViewport, 250));
 applySplash();
 (function(){
   const sp = $('#splash'); if (!sp) return;
@@ -1119,7 +1186,7 @@ applySplash();
   };
   setTimeout(hide, 2600); sp.addEventListener('click', hide);
 })();
-document.addEventListener('visibilitychange', () => { if (!document.hidden){ fixHeight(); if (typeof crewRefresh === 'function' && S.settings.crewOn) crewRefresh(); if (page === 'home') render(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ if (typeof crewRefresh === 'function' && S.settings.crewOn) crewRefresh(); if (page === 'home') render(); } });
 if (S.settings.crewOn && S.settings.crewConsent) crewInit().then(crewRefresh).catch(() => {});
 render();
 if ('serviceWorker' in navigator){
