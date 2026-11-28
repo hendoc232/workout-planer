@@ -186,7 +186,7 @@ html.gapfix,html.gapfix body{background-color:#150d35}
 <script>
 'use strict';
 /* ---------- App-Infos ---------- */
-const VERSION = '1.4.2', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
+const VERSION = '1.4.3', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
 
 /* ---------- Helfer ---------- */
 const $ = s => document.querySelector(s);
@@ -765,7 +765,7 @@ const TC = {
   c_logout:'Abmelden', c_leave:'Crew verlassen', c_leaveQ:'Crew wirklich verlassen? Dein geteilter Plan wird dort gelöscht.', c_del:'Konto & Daten löschen', c_delQ:'Konto und alle Crew-Daten endgültig löschen? Die Daten auf diesem Gerät bleiben erhalten.',
   c_deleted:'Konto gelöscht', c_left:'Crew verlassen', c_published:'Plan geteilt', c_noPlans:'Noch keine geteilten Pläne in dieser Woche', c_wrongCode:'Code nicht gefunden', c_full:'Die Crew ist voll (max. 20)',
   c_err:'Fehler: ', c_cancel:'Schließen',
-  c_retry:'Neu laden', c_btnChat:'💬 Chat', c_btnWeek:'Crew-Woche', c_btnMenu:'Crew', c_start:'Crew starten oder beitreten', c_startHint:'Teile deinen Plan mit Freunden, sieh ihre Workouts und chatte mit ihnen.', c_loading:'Crew wird geladen …', c_fromCrew:'Aus deiner Crew', c_crewUse:n => `${n}× in der Crew`, c_more:'+ Weitere Crew', c_switch:'Deine Crews', c_chatNone:'Noch keine Chat-Nachrichten',
+  c_rename:'Namen ändern', c_renamed:'Name geändert', c_retry:'Neu laden', c_btnChat:'💬 Chat', c_btnWeek:'Crew-Woche', c_btnMenu:'Crew', c_start:'Crew starten oder beitreten', c_startHint:'Teile deinen Plan mit Freunden, sieh ihre Workouts und chatte mit ihnen.', c_loading:'Crew wird geladen …', c_fromCrew:'Aus deiner Crew', c_crewUse:n => `${n}× in der Crew`, c_more:'+ Weitere Crew', c_switch:'Deine Crews', c_chatNone:'Noch keine Chat-Nachrichten',
   c_chat:'Crew-Chat', c_msgPh:'Nachricht …', c_send:'Senden', c_noMsg:'Noch keine Nachrichten', c_delMsg:'Nachricht löschen', c_homeNone:'Noch keine anstehenden Crew-Workouts', c_chatRules:'Bitte respektvoll bleiben. Nachrichten sind für alle in der Crew sichtbar.', c_thread:'Chat zum Termin',
   e_invalid_credential:'E-Mail oder Passwort falsch', e_email_already_in_use:'Diese E-Mail ist schon registriert', e_weak_password:'Passwort zu kurz (mind. 6 Zeichen)', e_invalid_email:'E-Mail ungültig',
   e_popup_closed_by_user:'Anmeldung abgebrochen', e_network_request_failed:'Keine Verbindung', e_permission_denied:'Keine Berechtigung', e_requires_recent_login:'Bitte neu anmelden und erneut versuchen',
@@ -787,7 +787,7 @@ const TC = {
   c_logout:'Sign out', c_leave:'Leave crew', c_leaveQ:'Really leave the crew? Your shared plan will be deleted there.', c_del:'Delete account & data', c_delQ:'Permanently delete your account and all crew data? Data on this device is kept.',
   c_deleted:'Account deleted', c_left:'Left the crew', c_published:'Plan shared', c_noPlans:'No shared plans this week yet', c_wrongCode:'Code not found', c_full:'The crew is full (max. 20)',
   c_err:'Error: ', c_cancel:'Close',
-  c_retry:'Retry', c_btnChat:'💬 Chat', c_btnWeek:'Crew week', c_btnMenu:'Crew', c_start:'Start or join a crew', c_startHint:'Share your plan with friends, see their workouts and chat with them.', c_loading:'Loading crew …', c_fromCrew:'From your crew', c_crewUse:n => `${n}× in the crew`, c_more:'+ Another crew', c_switch:'Your crews', c_chatNone:'No chat messages yet',
+  c_rename:'Change name', c_renamed:'Name changed', c_retry:'Retry', c_btnChat:'💬 Chat', c_btnWeek:'Crew week', c_btnMenu:'Crew', c_start:'Start or join a crew', c_startHint:'Share your plan with friends, see their workouts and chat with them.', c_loading:'Loading crew …', c_fromCrew:'From your crew', c_crewUse:n => `${n}× in the crew`, c_more:'+ Another crew', c_switch:'Your crews', c_chatNone:'No chat messages yet',
   c_chat:'Crew chat', c_msgPh:'Message …', c_send:'Send', c_noMsg:'No messages yet', c_delMsg:'Delete message', c_homeNone:'No upcoming crew workouts yet', c_chatRules:'Please stay respectful. Messages are visible to everyone in the crew.', c_thread:'Session chat',
   e_invalid_credential:'Wrong email or password', e_email_already_in_use:'This email is already registered', e_weak_password:'Password too short (min. 6 characters)', e_invalid_email:'Invalid email',
   e_popup_closed_by_user:'Sign-in cancelled', e_network_request_failed:'No connection', e_permission_denied:'Not allowed', e_requires_recent_login:'Please sign in again and retry',
@@ -882,10 +882,10 @@ function loginSheet(){
     <div class="btnrow" style="margin-top:8px"><button data-act="cgoogle">${t('c_google')}</button><button data-act="creset">${t('c_reset')}</button></div>
     <div class="btnrow"><button data-act="close">${t('c_cancel')}</button></div>`);
 }
-function nameSheet(){
+function nameSheet(back){
   openSheet(`<h3>${t('c_nameH')}</h3><p class="hint">${t('c_nameHint')}</p>
     <input type="text" id="c-name" maxlength="30" placeholder="${t('c_namePh')}" value="${esc((PROF && PROF.name) || '')}">
-    <div class="btnrow"><button data-act="close">${t('c_cancel')}</button><button class="primary" data-act="cname">${t('c_save')}</button></div>`);
+    <div class="btnrow"><button data-act="${back ? 'cback' : 'close'}">${back ? t('back') : t('c_cancel')}</button><button class="primary" data-act="cname">${t('c_save')}</button></div>`);
 }
 function noCrewSheet(back){
   openSheet(`<h3>${t('c_noCrew')}</h3>
@@ -902,7 +902,7 @@ function mainCrewSheet(){
     <h4>${t('c_code')}</h4><div class="big" style="font-size:28px;letter-spacing:.12em">${esc(CREW.id)}</div>
     <div class="btnrow"><button data-act="ccopy">${t('c_copy')}</button><button class="${on?'primary':''}" data-act="cshare">${on ? t('c_shareOn') : t('c_shareOff')}</button></div>
     <div class="btnrow" style="margin-top:8px"><button class="primary" data-act="cview">${t('c_view')}</button><button class="primary" data-act="cchat">${t('c_chat')}</button></div>
-    <div class="btnrow" style="margin-top:14px"><button data-act="cleave">${t('c_leave')}</button><button data-act="clogout">${t('c_logout')}</button></div>
+    <div class="btnrow" style="margin-top:14px"><button data-act="cren">${t('c_rename')}</button><button data-act="cleave">${t('c_leave')}</button></div><div class="btnrow" style="margin-top:8px"><button data-act="clogout">${t('c_logout')}</button></div>
     <div class="btnrow"><button data-act="cdel" class="danger">${t('c_del')}</button>${CREWS.length < MAXMY ? `<button data-act="cmore">${t('c_more')}</button>` : ''}</div><div class="btnrow"><button data-act="close">${t('c_cancel')}</button></div>`);
 }
 async function showCrewWeek(){
@@ -1103,7 +1103,7 @@ async function crewAct(a, el){
         await FB.au.sendPasswordResetEmail(FB.auth, mail); return toast(t('c_resetSent')); }
       case 'cname': {
         const n = v('c-name'); if (!n || n.length > 30) return toast(t('c_needName'));
-        await setProfile({name: n}); return showCrew(); }
+        await setProfile({name: n}); if (CREWS.length){ toast(t('c_renamed')); publishPlan(); } return showCrew(); }
       case 'ccreate': {
         const n = v('c-cname') || PROF.name + '’s Crew', {fs, db} = FB;
         let code = newCode();
@@ -1139,6 +1139,7 @@ async function crewAct(a, el){
       case 'cthis': cmon = mondayOf(new Date()); return showCrewWeek();
       case 'cback': return showCrew();
       case 'cweek': return showCrewWeek();
+      case 'cren': return nameSheet(true);
       case 'cmore': return noCrewSheet('back');
       case 'cact': setActive(el.dataset.id); save(); if (sheetOpen()) mainCrewSheet(); render(); crewRefresh(); return;
       case 'hchat': if (!(FB && ME && CREW)) return openCrew(); return openChat('crew', t('c_chat'), 'close');
