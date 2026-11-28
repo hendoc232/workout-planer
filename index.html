@@ -23,7 +23,7 @@ body::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;o
 .glow{position:absolute;left:-15%;right:-15%;bottom:-22vh;height:50vh;z-index:0;pointer-events:none;border-radius:50%;opacity:.62;filter:blur(55px);
   background:linear-gradient(95deg,#ff7a45 0%,#ffc53d 22%,#4be3a3 42%,#3da5ff 62%,#8b5cff 82%,#ff6ad5 100%)}
 input,select{-webkit-user-select:text;user-select:text}
-#app{position:relative;z-index:1;height:100vh;height:var(--H,100dvh);max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:7px;padding:calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 10px)}
+#app{position:relative;z-index:1;height:100vh;height:var(--H,100dvh);max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:7px;padding:calc(max(env(safe-area-inset-top), var(--gt,0px)) + 8px) 12px calc(env(safe-area-inset-bottom) + 10px)}
 button,input,select{font:inherit;color:inherit}
 button{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 12px;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 button:active{opacity:.7}
@@ -173,6 +173,8 @@ a{color:var(--uv);font-weight:700}
 .ctabs{display:flex;gap:6px;overflow:auto;margin-top:6px;flex:none}
 .ctabs button{flex:none;padding:5px 12px;font-size:11px;font-weight:800}.ctabs .on{background:var(--uv)!important;border-color:var(--uv)!important}
 .panel:not(.cp){flex:0 1 112px!important;min-height:64px!important}
+.gapfix .glow{-webkit-mask-image:linear-gradient(to bottom,#000 50%,transparent 100%);mask-image:linear-gradient(to bottom,#000 50%,transparent 100%)}
+html.gapfix,html.gapfix body{background-color:#150d35}
 </style>
 </head>
 <body>
@@ -184,7 +186,7 @@ a{color:var(--uv);font-weight:700}
 <script>
 'use strict';
 /* ---------- App-Infos ---------- */
-const VERSION = '1.4.1', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
+const VERSION = '1.4.2', RELEASED = '27.11.2026', AUTHOR = 'Hendrik Behrens', CONTACT = 'Hendrik.Behrens.to@gmx.de', YEAR = 2026;
 
 /* ---------- Helfer ---------- */
 const $ = s => document.querySelector(s);
@@ -1176,22 +1178,19 @@ async function crewAct(a, el){
 // Dann sorgt die volle Bildschirmhöhe dafür, dass Hintergrund und Leiste ganz nach unten reichen.
 function isSA(){ return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }
 function gapNow(){ const portrait = window.matchMedia ? window.matchMedia('(orientation: portrait)').matches : true; const g = window.screen.height - window.innerHeight; return (isSA() && portrait && g > 20 && g < 120) ? g : 0; }
-function fixHeight(){ document.documentElement.style.removeProperty('--H'); }
-// iOS-Fehler: Die Homescreen-App bekommt manchmal ein zu kurzes Fenster (ca. 59 px). CSS kann das nicht ausgleichen.
-// Wir versuchen eine Neuberechnung des Viewports und laden notfalls einmal neu.
-function healViewport(){
-  if (!gapNow()) return;
-  const m = document.querySelector('meta[name=viewport]');
-  if (m){ const v = m.content; m.content = 'width=device-width,initial-scale=1'; setTimeout(() => { m.content = v; }, 60); }
-  window.scrollTo(0, 0);
-  setTimeout(() => {
-    if (!gapNow()) return;
-    let n = 0; try { n = +sessionStorage.getItem('hx') || 0; } catch(e){}
-    if (n < 2){ try { sessionStorage.setItem('hx', String(n + 1)); } catch(e){} location.reload(); }
-  }, 900);
+function isSA(){ return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }
+// iOS-Fehler: Manchmal startet die Homescreen-App mit einem um die Statusleiste (ca. 59 px) zu kurzen Fenster und ohne oberen Sicherheitsabstand.
+// Die Seite kann das Fenster nicht vergrößern. Wir schieben den Inhalt aber um genau diese Höhe nach unten und blenden den Rand weich aus.
+function applyGap(){
+  const portrait = window.matchMedia ? window.matchMedia('(orientation: portrait)').matches : true;
+  const g = window.screen.height - window.innerHeight;
+  const on = isSA() && portrait && g > 20 && g < 120;
+  const r = document.documentElement;
+  r.style.setProperty('--gt', on ? g + 'px' : '0px');
+  r.classList.toggle('gapfix', on);
 }
-setTimeout(healViewport, 250);
-addEventListener('pageshow', () => setTimeout(healViewport, 250));
+applyGap(); [100, 400, 1000, 2500].forEach(ms => setTimeout(applyGap, ms));
+addEventListener('resize', applyGap); addEventListener('orientationchange', () => setTimeout(applyGap, 300)); addEventListener('pageshow', applyGap);
 applySplash();
 (function(){
   const sp = $('#splash'); if (!sp) return;
@@ -1206,7 +1205,7 @@ applySplash();
   };
   setTimeout(hide, 2600); sp.addEventListener('click', hide);
 })();
-document.addEventListener('visibilitychange', () => { if (!document.hidden){ if (typeof crewRefresh === 'function' && S.settings.crewConsent){ if (crewReady) crewRefresh(); else crewStart(); } if (page === 'home') render(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ applyGap(); if (typeof crewRefresh === 'function' && S.settings.crewConsent){ if (crewReady) crewRefresh(); else crewStart(); } if (page === 'home') render(); } });
 if (S.settings.crewConsent) crewStart();
 render();
 if ('serviceWorker' in navigator){
