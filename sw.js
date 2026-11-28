@@ -1,4 +1,4 @@
-const C = 'wp-1.4.3';
+const C = 'wp-1.5.0';
 const ASSETS = ['./', 'index.html', 'manifest.json', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(ASSETS)));
